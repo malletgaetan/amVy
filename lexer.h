@@ -10,6 +10,7 @@ struct Lexer {
 };
 
 bool lexer_init(struct Lexer *lexer, char *filepath);
+void lexer_destroy(struct Lexer *lexer);
 struct Token lexer_next_token(struct Lexer *lexer);
 
 #endif

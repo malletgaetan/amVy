@@ -10,6 +10,14 @@ char *token_debug[] =
 
 	[TOKEN_ASSIGN] = "ASSIGN",
 	[TOKEN_PLUS] = "PLUS",
+	[TOKEN_MINUS] = "MINUS",
+	[TOKEN_ASTERISK] = "ASTERISK",
+	[TOKEN_SLASH] = "SLASH",
+
+	[TOKEN_EQUAL] = "EQUAL",
+	[TOKEN_NOT_EQUAL] = "NOT EQUAL",
+	[TOKEN_LESSER] = "LESS THAN",
+	[TOKEN_GREATER] = "GREATER THAN",
 
 	[TOKEN_COMMA] = "COMMA",
 	[TOKEN_SEMICOLON] = "SEMICOLON",
@@ -21,6 +29,11 @@ char *token_debug[] =
 
 	[TOKEN_FUNCTION] = "FUNCTION",
 	[TOKEN_LET] = "LET",
+	[TOKEN_TRUE] = "TRUE", // TODO: maybe get rid of booleans, just like in C
+	[TOKEN_FALSE] = "FALSE",
+	[TOKEN_IF] = "IF",
+	[TOKEN_ELSE] = "ELSE",
+	[TOKEN_RETURN] = "RETURN",
 };
 
 const char *token_debug_value(enum TokenType type)

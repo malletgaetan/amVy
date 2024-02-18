@@ -25,5 +25,6 @@ int main(int ac, char **av)
 		token = lexer_next_token(&lexer);
 	}
 	printf("DONE!\n");
+	lexer_destroy(&lexer);
 }
 

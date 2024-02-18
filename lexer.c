@@ -47,10 +47,21 @@ static struct Token new_identifier(struct Lexer *lexer)
 
 	token.literal = lexer->input + lexer->index;
 	token.size = lexer->next_index - lexer->index;
+	// TODO: replace with a hashmap ?
 	if (token.size == 2 && strncmp(token.literal, "fn", 2) == 0)
 		token.type = TOKEN_FUNCTION;
+	else if (token.size == 2 && strncmp(token.literal, "if", 2) == 0)
+		token.type = TOKEN_IF;
 	else if (token.size == 3 && strncmp(token.literal, "let", 3) == 0)
 		token.type = TOKEN_LET;
+	else if (token.size == 4 && strncmp(token.literal, "true", 4) == 0)
+		token.type = TOKEN_TRUE;
+	else if (token.size == 4 && strncmp(token.literal, "else", 4) == 0)
+		token.type = TOKEN_ELSE;
+	else if (token.size == 5 && strncmp(token.literal, "false", 5) == 0)
+		token.type = TOKEN_FALSE;
+	else if (token.size == 6 && strncmp(token.literal, "return", 6) == 0)
+		token.type = TOKEN_RETURN;
 	else
 		token.type = TOKEN_IDENTIFIER;
 	return token;
@@ -94,6 +105,12 @@ fail_close:
 	return True;
 }
 
+void lexer_destroy(struct Lexer *lexer)
+{
+	free(lexer->input);
+	lexer->input = NULL;
+}
+
 struct Token lexer_next_token(struct Lexer *lexer)
 {
 	skip_whitespaces(lexer);
@@ -104,7 +121,25 @@ struct Token lexer_next_token(struct Lexer *lexer)
 		case '\0':
 			return new_token(lexer, TOKEN_EOF);
 		case '=':
+			if (lexer->input[lexer->next_index] == '=')
+			{
+				++lexer->next_index;
+				return new_token(lexer, TOKEN_EQUAL);
+			}
 			return new_token(lexer, TOKEN_ASSIGN);
+		case '!':
+			if (lexer->input[lexer->next_index] != '=')
+				return new_token(lexer, TOKEN_UNKNOWN);
+			++lexer->next_index;
+			return new_token(lexer, TOKEN_NOT_EQUAL);
+		case '*':
+			return new_token(lexer, TOKEN_ASTERISK);
+		case '/':
+			return new_token(lexer, TOKEN_SLASH);
+		case '>':
+			return new_token(lexer, TOKEN_GREATER);
+		case '<':
+			return new_token(lexer, TOKEN_LESSER);
 		case '+':
 			return new_token(lexer, TOKEN_PLUS);
 		case ',':

@@ -12,6 +12,14 @@ enum TokenType {
 
 	TOKEN_ASSIGN,
 	TOKEN_PLUS,
+	TOKEN_MINUS,
+	TOKEN_ASTERISK,
+	TOKEN_SLASH,
+
+	TOKEN_EQUAL,
+	TOKEN_NOT_EQUAL,
+	TOKEN_LESSER,
+	TOKEN_GREATER,
 
 	TOKEN_COMMA,
 	TOKEN_SEMICOLON,
@@ -21,8 +29,14 @@ enum TokenType {
 	TOKEN_LBRACE,
 	TOKEN_RBRACE,
 
+	// keywords
 	TOKEN_FUNCTION,
 	TOKEN_LET,
+	TOKEN_TRUE, // TODO: maybe get rid of booleans, just like in C
+	TOKEN_FALSE,
+	TOKEN_IF,
+	TOKEN_ELSE,
+	TOKEN_RETURN,
 };
 
 struct Token {
