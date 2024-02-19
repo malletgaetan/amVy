@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "token.h"
 #include "types.h"
+#include "string.h"
 
 static bool is_letter(char c)
 {
@@ -33,8 +34,8 @@ static struct Token new_token(struct Lexer *lexer, enum TokenType type)
 	token.type = type;
 	if (type == TOKEN_UNKNOWN)
 		return token;
-	token.literal = lexer->input + lexer->index;
-	token.size = lexer->next_index - lexer->index;
+	token.literal.str = lexer->input + lexer->index;
+	token.literal.size = lexer->next_index - lexer->index;
 	return token;
 }
 
@@ -45,22 +46,22 @@ static struct Token new_identifier(struct Lexer *lexer)
 	while (is_identifier(lexer->input[lexer->next_index]))
 		++lexer->next_index;
 
-	token.literal = lexer->input + lexer->index;
-	token.size = lexer->next_index - lexer->index;
+	token.literal.str = lexer->input + lexer->index;
+	token.literal.size = lexer->next_index - lexer->index;
 	// TODO: replace with a hashmap ?
-	if (token.size == 2 && strncmp(token.literal, "fn", 2) == 0)
+	if (token.literal.size == 2 && strncmp(token.literal.str, "fn", 2) == 0)
 		token.type = TOKEN_FUNCTION;
-	else if (token.size == 2 && strncmp(token.literal, "if", 2) == 0)
+	else if (token.literal.size == 2 && strncmp(token.literal.str, "if", 2) == 0)
 		token.type = TOKEN_IF;
-	else if (token.size == 3 && strncmp(token.literal, "let", 3) == 0)
+	else if (token.literal.size == 3 && strncmp(token.literal.str, "let", 3) == 0)
 		token.type = TOKEN_LET;
-	else if (token.size == 4 && strncmp(token.literal, "true", 4) == 0)
+	else if (token.literal.size == 4 && strncmp(token.literal.str, "true", 4) == 0)
 		token.type = TOKEN_TRUE;
-	else if (token.size == 4 && strncmp(token.literal, "else", 4) == 0)
+	else if (token.literal.size == 4 && strncmp(token.literal.str, "else", 4) == 0)
 		token.type = TOKEN_ELSE;
-	else if (token.size == 5 && strncmp(token.literal, "false", 5) == 0)
+	else if (token.literal.size == 5 && strncmp(token.literal.str, "false", 5) == 0)
 		token.type = TOKEN_FALSE;
-	else if (token.size == 6 && strncmp(token.literal, "return", 6) == 0)
+	else if (token.literal.size == 6 && strncmp(token.literal.str, "return", 6) == 0)
 		token.type = TOKEN_RETURN;
 	else
 		token.type = TOKEN_IDENTIFIER;
@@ -118,7 +119,7 @@ struct Token lexer_next_token(struct Lexer *lexer)
 	char c = lexer->input[lexer->next_index++];
 
 	switch (c) {
-		case '\0':
+		case '\0': // NOTE: this case should remain first
 			return new_token(lexer, TOKEN_EOF);
 		case '=':
 			if (lexer->input[lexer->next_index] == '=')

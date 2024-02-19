@@ -2,6 +2,7 @@
 # define TOKEN_H
 
 # include "types.h"
+# include "string.h"
 
 enum TokenType {
 	TOKEN_EOF,
@@ -41,8 +42,7 @@ enum TokenType {
 
 struct Token {
 	enum TokenType type;
-	const char *literal;
-	u16 size;
+	struct String literal;
 };
 
 const char *token_debug_value(enum TokenType type);
