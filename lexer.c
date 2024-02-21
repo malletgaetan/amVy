@@ -77,7 +77,7 @@ static struct Token new_integer(struct Lexer *lexer)
 
 static void skip_whitespaces(struct Lexer *lexer)
 {
-	while (is_space(lexer->input[lexer->next_index]))
+	while (lexer->input[lexer->index] && is_space(lexer->input[lexer->next_index]))
 		++lexer->next_index;
 }
 
@@ -116,6 +116,8 @@ struct Token lexer_next_token(struct Lexer *lexer)
 {
 	skip_whitespaces(lexer);
 	lexer->index = lexer->next_index;
+	if (!lexer->input[lexer->index])
+			return new_token(lexer, TOKEN_EOF);
 	char c = lexer->input[lexer->next_index++];
 
 	switch (c) {
@@ -141,6 +143,8 @@ struct Token lexer_next_token(struct Lexer *lexer)
 			return new_token(lexer, TOKEN_GREATER);
 		case '<':
 			return new_token(lexer, TOKEN_LESSER);
+		case '-':
+			return new_token(lexer, TOKEN_MINUS);
 		case '+':
 			return new_token(lexer, TOKEN_PLUS);
 		case ',':

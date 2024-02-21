@@ -14,6 +14,6 @@ struct Parser {
 
 bool parser_init(struct Parser *parser, char *filepath);
 void parser_destroy(struct Parser *parser);
-struct Program parser_parse(void);
+struct Program parser_parse(struct Parser *parser);
 
 #endif

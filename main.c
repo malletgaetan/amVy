@@ -1,30 +1,25 @@
 #include <stdio.h>
-
-#include "lexer.h"
-#include "token.h"
+#include "parser.h"
+#include "ast.h"
+#include "vector.h"
 
 int main(int ac, char **av)
 {
 	if (ac < 2)
 	{
-		printf("TODO\n");
+		printf("nothing to do\n");
 		return (0);
 	}
-	struct Lexer lexer;
 
-	if (lexer_init(&lexer, av[1]))
-	{
-		printf("that didn't worked out!\n");
-		return (1);
-	}
+	struct Parser parser;
 
-	struct Token token = lexer_next_token(&lexer);
-	while (token.type != TOKEN_EOF)
+	parser_init(&parser, av[1]);
+	struct Program program = parser_parse(&parser);
+	for (unsigned int i = 0; i < vector_size(program.statements); i++)
 	{
-		printf("Got a token of type %s\n", token_debug_value(token.type));
-		token = lexer_next_token(&lexer);
+		print_node(program.statements[i], 0);
 	}
-	printf("DONE!\n");
-	lexer_destroy(&lexer);
+	parser_destroy(&parser);
+	return (0);
 }
 

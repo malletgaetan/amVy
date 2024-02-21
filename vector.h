@@ -9,13 +9,15 @@ typedef struct {
 	size_t capacity;
 } VectorMetadata;
 
+# define VECTOR_BASE_SIZE 10000
+
 # define vector_add(arr, element)																																	\
 {																																									\
 	if ((arr) == NULL)																																				\
 	{																																								\
-		(arr) = malloc((sizeof((element)) * 2) + sizeof(VectorMetadata));																							\
+		(arr) = malloc((sizeof((element)) * VECTOR_BASE_SIZE) + sizeof(VectorMetadata));																							\
 		assert(arr);																																				\
-		((VectorMetadata *)(arr))[0].capacity = 2;																													\
+		((VectorMetadata *)(arr))[0].capacity = VECTOR_BASE_SIZE;																													\
 		((VectorMetadata *)(arr))[0].len = 1;																														\
 		(arr) = (typeof(element) *)(((VectorMetadata *)(arr)) + 1);																									\
 		((typeof(element) *)(arr))[0] = (element);																													\
