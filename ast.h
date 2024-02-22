@@ -3,16 +3,13 @@
 
 # include "string.h"
 
-enum BinaryOpType {
+enum OpType {
 	BINARY_ADD,
 	BINARY_MINUS,
 	BINARY_MULTIPLY,
 	BINARY_DIVIDE,
-};
-
-enum UnaryOpType {
 	UNARY_MINUS,
-	UNARY_INVERSE,
+	BINARY_ARRAY_ACCESS,
 };
 
 struct LetStatement {
@@ -20,14 +17,18 @@ struct LetStatement {
 	struct Node *value;
 };
 
+struct ReturnStatement {
+	struct Node *expr;
+};
+
 struct BinaryOp {
 	struct Node *left;
-	enum BinaryOpType op;
+	enum OpType op;
 	struct Node *right;
 };
 
 struct UnaryOp {
-	enum UnaryOpType op;
+	enum OpType op;
 	struct Node *value;
 };
 
@@ -45,6 +46,7 @@ enum NodeType {
 	AST_BINARY_OP,
 	AST_UNARY_OP,
 	AST_INTEGER_LITERAL,
+	AST_RETURN_STATEMENT,
 };
 
 struct Node {
@@ -55,6 +57,7 @@ struct Node {
 		struct UnaryOp unary_op;
 		struct Identifier identifier;
 		struct IntegerLiteral integer_literal;
+		struct ReturnStatement return_statement;
 	} node;
 };
 

@@ -159,6 +159,10 @@ struct Token lexer_next_token(struct Lexer *lexer)
 			return new_token(lexer, TOKEN_LBRACE);
 		case '}':
 			return new_token(lexer, TOKEN_RBRACE);
+		case '[':
+			return new_token(lexer, TOKEN_LBRACKET);
+		case ']':
+			return new_token(lexer, TOKEN_RBRACKET);
 		default: // identifier, integer, keywords
 			if (is_letter(c))
 				return new_identifier(lexer);
