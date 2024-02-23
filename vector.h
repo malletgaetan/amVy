@@ -9,7 +9,7 @@ typedef struct {
 	size_t capacity;
 } VectorMetadata;
 
-# define VECTOR_BASE_SIZE 10000
+# define VECTOR_BASE_SIZE 10
 
 # define vector_add(arr, element)																																	\
 {																																									\

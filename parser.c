@@ -19,6 +19,7 @@ static int	token_precedence[TOKEN_LIMIT] =
 	[TOKEN_ASTERISK] = 20,
 	[TOKEN_SLASH] = 20,
 	[TOKEN_LBRACKET] = 30,
+	[TOKEN_LPAREN] = 30,
 };
 
 int	nzatoi(struct String string)
@@ -68,17 +69,57 @@ static struct Node *parseIdentifier(struct Parser *parser)
 static struct Node *parseArrayAccessExpression(struct Parser *parser, struct Node *left)
 {
 	assert(parser->token.type == TOKEN_LBRACKET);
-	struct Node *expr = malloc(sizeof(struct BinaryOp));
+	struct Node *expr = malloc(sizeof(struct ArrayAccess));
 	assert(expr);
 
 	// TODO: maybe create a special IndexAccess struct for clearer source code
-	expr->type = AST_BINARY_OP;
-	expr->node.binary_op.left = left;
-	expr->node.binary_op.op = BINARY_ARRAY_ACCESS;
+	expr->type = AST_ARRAY_ACCESS;
+	expr->node.array_access.identifier = left;
 	next_token(parser);
-	expr->node.binary_op.right = parseExpression(parser, 0);
+	expr->node.array_access.index = parseExpression(parser, 0);
 	next_token(parser);
 	assert(parser->token.type == TOKEN_RBRACKET);
+	return expr;
+}
+
+static struct Node *parseListExpression(struct Parser *parser, enum TokenType end)
+{
+	struct Node *list_expr = malloc(sizeof(struct ListExpression));
+	assert(list_expr);
+
+	list_expr->type = AST_LIST_EXPRESSION;
+	list_expr->node.list_expression.list = NULL;
+	// (a,b)
+	next_token(parser);
+	if (parser->token.type == end)
+		return list_expr;
+	
+	while (1)
+	{
+		struct Node *expr = parseExpression(parser, 0);
+		assert(expr);
+		vector_add(list_expr->node.list_expression.list, expr);
+		next_token(parser);
+		if (parser->token.type == end)
+			break;
+		assert(parser->token.type == TOKEN_COMMA);
+		next_token(parser);
+	}
+
+	return list_expr;
+}
+
+static struct Node *parseFunctionCallExpression(struct Parser *parser, struct Node *left)
+{
+	struct Node *expr = malloc(sizeof(struct FunctionCall));
+	assert(expr);
+
+	// TODO: maybe create a special IndexAccess struct for clearer source code
+	assert(parser->token.type == TOKEN_LPAREN);
+	expr->type = AST_FUNCTION_CALL;
+	expr->node.function_call.identifier = left;
+	expr->node.function_call.arguments = parseListExpression(parser, TOKEN_RPAREN);
+	assert(parser->token.type == TOKEN_RPAREN);
 	return expr;
 }
 
@@ -101,6 +142,9 @@ static struct Node *parseInfixExpression(struct Parser *parser, struct Node *lef
 			break;
 		case TOKEN_LBRACKET:
 			return parseArrayAccessExpression(parser, left);
+		case TOKEN_LPAREN:
+			return parseFunctionCallExpression(parser, left);
+		case TOKEN_RPAREN:
 		case TOKEN_RBRACKET:
 			return left;
 		default:
@@ -147,7 +191,6 @@ static struct Node *parsePrefixExpression(struct Parser *parser)
 
 static struct Node *parseExpression(struct Parser *parser, int precedence)
 {
-	/* printf("test precedence(%d) %s=%d\n", precedence, token_debug_value(parser->token.type), token_precedence[parser->token.type]) */
 	struct Node *left = parsePrefixExpression(parser);
 
 	while (parser->token.type != TOKEN_EOF && precedence < token_precedence[parser->next_token.type])

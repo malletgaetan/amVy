@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "vector.h"
 #include "string.h"
 #include "ast.h"
 
@@ -11,7 +12,6 @@ char *op_debug[] =
 	[BINARY_MULTIPLY] = "BINARY *",
 	[BINARY_DIVIDE] = "BINARY /",
 	[UNARY_MINUS] = "UNARY -",
-	[BINARY_ARRAY_ACCESS] = "ARRAY ACCESS",
 };
 
 char *ast_debug[] = 
@@ -22,6 +22,9 @@ char *ast_debug[] =
 	[AST_UNARY_OP] = "AST_UNARY_OP",
 	[AST_INTEGER_LITERAL] = "AST_INTEGER_LITERAL",
 	[AST_RETURN_STATEMENT] = "AST_RETURN_STATEMENT",
+	[AST_ARRAY_ACCESS] = "AST_ARRAY_ACCESS",
+	[AST_FUNCTION_CALL] = "AST_FUNCTION_CALL",
+	[AST_LIST_EXPRESSION] = "AST_LIST_EXPRESSION",
 };
 
 const char *ast_debug_value(enum NodeType type)
@@ -45,6 +48,30 @@ void print_node(struct Node *node, int i)
 			print_node(node->node.let_statement.identifier, i);
 			printf("%*svalue:\n", i * DEBUG_INDENT," ");
 			print_node(node->node.let_statement.value, i);
+			break;
+		case AST_LIST_EXPRESSION:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_LIST_EXPRESSION]);
+			printf("%*ssize: %zu\n", ++i * DEBUG_INDENT, " ", vector_size(node->node.list_expression.list));
+			printf("%*selements:\n", i * DEBUG_INDENT," ");
+			for (unsigned int j = 0; j < vector_size(node->node.list_expression.list); j++)
+			{
+				printf("%*s ---- %u ----\n", i * DEBUG_INDENT, " ", j);
+				print_node(node->node.list_expression.list[j], i);
+			}
+			break;
+		case AST_FUNCTION_CALL:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_FUNCTION_CALL]);
+			printf("%*sidentifier:\n", ++i * DEBUG_INDENT," ");
+			print_node(node->node.function_call.identifier, i);
+			printf("%*sindex:\n", i * DEBUG_INDENT," ");
+			print_node(node->node.function_call.arguments, i);
+			break;
+		case AST_ARRAY_ACCESS:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_ARRAY_ACCESS]);
+			printf("%*sidentifier:\n", ++i * DEBUG_INDENT," ");
+			print_node(node->node.array_access.identifier, i);
+			printf("%*sindex:\n", i * DEBUG_INDENT," ");
+			print_node(node->node.array_access.index, i);
 			break;
 		case AST_BINARY_OP:
 			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_BINARY_OP]);
