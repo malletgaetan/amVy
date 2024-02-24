@@ -31,6 +31,7 @@ char *ast_debug[] =
 	[AST_LIST_EXPRESSION] = "AST_LIST_EXPRESSION",
 	[AST_IF_STATEMENT] = "AST_IF_STATEMENT",
 	[AST_BLOCK_STATEMENT] = "AST_BLOCK_STATEMENT",
+	[AST_FUNCTION_DEFINITION] = "AST_FUNCTION_DEFINITION",
 };
 
 const char *ast_debug_value(enum NodeType type)
@@ -50,6 +51,19 @@ void print_node(struct Node *node, int i)
 {
 	switch (node->type)
 	{
+		case AST_FUNCTION_DEFINITION:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_FUNCTION_DEFINITION]);
+			printf("%*sidentifier:\n", ++i * DEBUG_INDENT, " ");
+			print_node(node->node.function_definition.identifier, i);
+			printf("%*sparameters:\n", i * DEBUG_INDENT, " ");
+			for (size_t j = 0; j < vector_size(node->node.function_definition.parameters); j++)
+			{
+				printf("%*s ---- %zu ----\n", i * DEBUG_INDENT, " ", j);
+				print_node(node->node.function_definition.parameters[j], i);
+			}
+			printf("%*sblock:\n", i * DEBUG_INDENT, " ");
+			print_node(node->node.function_definition.block, i);
+			break;
 		case AST_IF_STATEMENT:
 			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_IF_STATEMENT]);
 			printf("%*scondition:\n", ++i * DEBUG_INDENT," ");

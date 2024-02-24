@@ -37,6 +37,6 @@ typedef struct {
 
 # define vector_destroy(arr) free(((VectorMetadata *)(arr)) - 1)
 
-# define vector_size(arr) ((VectorMetadata *)(arr))[-1].len
+# define vector_size(arr) ((arr == NULL) ? 0 : ((VectorMetadata *)(arr))[-1].len)
 
 #endif

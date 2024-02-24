@@ -40,6 +40,12 @@ struct FunctionCall {
 	struct Node *arguments;
 };
 
+struct FunctionDefinition {
+	struct Node *identifier;
+	struct Node **parameters;
+	struct Node *block;
+};
+
 struct ListExpression {
 	struct Node **list;
 };
@@ -79,6 +85,7 @@ enum NodeType {
 	AST_LIST_EXPRESSION,
 	AST_IF_STATEMENT,
 	AST_BLOCK_STATEMENT,
+	AST_FUNCTION_DEFINITION,
 };
 
 struct Node {
@@ -95,6 +102,7 @@ struct Node {
 		struct ListExpression list_expression;
 		struct IfStatement if_statement;
 		struct BlockStatement block_statement;
+		struct FunctionDefinition function_definition;
 	} node;
 };
 

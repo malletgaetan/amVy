@@ -76,7 +76,7 @@ static struct Node *parseIdentifier(struct Parser *parser)
 static struct Node *parseArrayAccessExpression(struct Parser *parser, struct Node *left)
 {
 	assert(parser->token.type == TOKEN_LBRACKET);
-	struct Node *expr = malloc(sizeof(struct ArrayAccess));
+	struct Node *expr = malloc(sizeof(struct Node));
 	assert(expr);
 
 	// TODO: maybe create a special IndexAccess struct for clearer source code
@@ -91,7 +91,7 @@ static struct Node *parseArrayAccessExpression(struct Parser *parser, struct Nod
 
 static struct Node *parseListExpression(struct Parser *parser, enum TokenType end)
 {
-	struct Node *list_expr = malloc(sizeof(struct ListExpression));
+	struct Node *list_expr = malloc(sizeof(struct Node));
 	assert(list_expr);
 
 	list_expr->type = AST_LIST_EXPRESSION;
@@ -117,7 +117,7 @@ static struct Node *parseListExpression(struct Parser *parser, enum TokenType en
 
 static struct Node *parseFunctionCallExpression(struct Parser *parser, struct Node *left)
 {
-	struct Node *expr = malloc(sizeof(struct FunctionCall));
+	struct Node *expr = malloc(sizeof(struct Node));
 	assert(expr);
 
 	// TODO: maybe create a special IndexAccess struct for clearer source code
@@ -306,6 +306,34 @@ static struct Node *parseIfStatement(struct Parser *parser)
 	return node;
 }
 
+static struct Node *parseFunctionDefinition(struct Parser *parser)
+{
+	assert(parser->token.type == TOKEN_FUNCTION);
+	// TODO: each new node allocation should init all fields (NULL init)
+	struct Node *node = malloc(sizeof(struct Node));
+	node->type = AST_FUNCTION_DEFINITION;
+	node->node.function_definition.parameters = NULL;
+	node->node.function_definition.block = NULL;
+
+	next_token(parser);
+	node->node.function_definition.identifier = parseIdentifier(parser);
+	next_token(parser);
+	assert(parser->token.type == TOKEN_LPAREN);
+
+	next_token(parser);
+	while (parser->token.type != TOKEN_RPAREN)
+	{
+		if (parser->token.type == TOKEN_COMMA)
+			next_token(parser);
+		struct Node *identifier = parseIdentifier(parser);
+		vector_add(node->node.function_definition.parameters, identifier);
+		next_token(parser);
+	}
+	next_token(parser);
+	node->node.function_definition.block = parseBlockStatement(parser);
+	return (node);
+}
+
 static struct Node *parseStatement(struct Parser *parser)
 {
 	struct Node *statement;
@@ -320,6 +348,8 @@ static struct Node *parseStatement(struct Parser *parser)
 			break;
 		case TOKEN_IF:
 			return parseIfStatement(parser);
+		case TOKEN_FUNCTION:
+			return parseFunctionDefinition(parser);
 		default:
 			printf("%s\n", token_debug_value(parser->token.type));
 			assert(NULL);
