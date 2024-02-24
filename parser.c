@@ -175,6 +175,12 @@ static struct Node *parsePrefixExpression(struct Parser *parser)
 			return parseIdentifier(parser);
 		case TOKEN_INTEGER:
 			return parseInteger(parser);
+		case TOKEN_LPAREN:
+			next_token(parser);
+			struct Node *expr = parseExpression(parser, 0);
+			next_token(parser);
+			assert(parser->token.type == TOKEN_RPAREN);
+			return expr;
 		default:
 			printf("%s\n", token_debug_value(parser->token.type));
 			assert(NULL);
@@ -193,7 +199,7 @@ static struct Node *parseExpression(struct Parser *parser, int precedence)
 {
 	struct Node *left = parsePrefixExpression(parser);
 
-	while (parser->token.type != TOKEN_EOF && precedence < token_precedence[parser->next_token.type])
+	while (parser->token.type != TOKEN_EOF && printf("test on %s\n", token_debug_value(parser->next_token.type)) && precedence < token_precedence[parser->next_token.type])
 	{
 		next_token(parser);
 		left = parseInfixExpression(parser, left);
@@ -216,6 +222,7 @@ static struct Node *parseLetStatement(struct Parser *parser)
 	next_token(parser);
 	node->node.let_statement.value = parseExpression(parser, 0);
 	next_token(parser);
+	printf("%s\n", token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_SEMICOLON);
 	return node;
 }
