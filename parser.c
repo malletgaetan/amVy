@@ -20,6 +20,7 @@ static int	token_precedence[TOKEN_LIMIT] =
 	[TOKEN_MINUS] = 10,
 	[TOKEN_ASTERISK] = 20,
 	[TOKEN_SLASH] = 20,
+	[TOKEN_ASSIGN] = 4,
 	[TOKEN_EQUAL] = 5,
 	[TOKEN_NOT_EQUAL] = 5,
 	[TOKEN_LESSER] = 5,
@@ -146,6 +147,9 @@ static struct Node *parseInfixExpression(struct Parser *parser, struct Node *lef
 		case TOKEN_SLASH:
 			op = BINARY_DIVIDE;
 			break;
+		case TOKEN_ASSIGN:
+			op = BINARY_ASSIGN;
+			break;
 		case TOKEN_LBRACKET:
 			return parseArrayAccessExpression(parser, left);
 		case TOKEN_LPAREN:
@@ -224,7 +228,7 @@ static struct Node *parseExpression(struct Parser *parser, int precedence)
 	struct Node *left = parsePrefixExpression(parser);
 
 	// && printf("test on %s\n", token_debug_value(parser->next_token.type))
-	while (parser->token.type != TOKEN_EOF && precedence < token_precedence[parser->next_token.type])
+	while (parser->token.type != TOKEN_SEMICOLON && precedence < token_precedence[parser->next_token.type])
 	{
 		next_token(parser);
 		left = parseInfixExpression(parser, left);
@@ -241,6 +245,7 @@ static struct Node *parseLetStatement(struct Parser *parser)
 	next_token(parser);
 	node->node.let_statement.identifier = parseIdentifier(parser);
 	next_token(parser);
+
 
 	assert(parser->token.type == TOKEN_ASSIGN);
 
@@ -351,8 +356,9 @@ static struct Node *parseStatement(struct Parser *parser)
 		case TOKEN_FUNCTION:
 			return parseFunctionDefinition(parser);
 		default:
-			printf("%s\n", token_debug_value(parser->token.type));
-			assert(NULL);
+			statement = parseExpression(parser, 0);
+			next_token(parser);
+			break;
 	}
 	assert(parser->token.type == TOKEN_SEMICOLON);
 	return statement;

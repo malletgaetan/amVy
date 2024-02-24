@@ -16,6 +16,7 @@ char *op_debug[] =
 	[BINARY_NOT_EQUAL] = "!=",
 	[BINARY_LT] = "<",
 	[BINARY_GT] = ">",
+	[BINARY_ASSIGN] = "=",
 };
 
 char *ast_debug[] = 

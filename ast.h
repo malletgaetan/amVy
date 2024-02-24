@@ -13,6 +13,7 @@ enum OpType {
 	BINARY_NOT_EQUAL,
 	BINARY_LT,
 	BINARY_GT,
+	BINARY_ASSIGN,
 };
 
 struct LetStatement {
