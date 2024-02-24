@@ -12,6 +12,10 @@ char *op_debug[] =
 	[BINARY_MULTIPLY] = "BINARY *",
 	[BINARY_DIVIDE] = "BINARY /",
 	[UNARY_MINUS] = "UNARY -",
+	[BINARY_EQUAL] = "==",
+	[BINARY_NOT_EQUAL] = "!=",
+	[BINARY_LT] = "<",
+	[BINARY_GT] = ">",
 };
 
 char *ast_debug[] = 
@@ -25,6 +29,8 @@ char *ast_debug[] =
 	[AST_ARRAY_ACCESS] = "AST_ARRAY_ACCESS",
 	[AST_FUNCTION_CALL] = "AST_FUNCTION_CALL",
 	[AST_LIST_EXPRESSION] = "AST_LIST_EXPRESSION",
+	[AST_IF_STATEMENT] = "AST_IF_STATEMENT",
+	[AST_BLOCK_STATEMENT] = "AST_BLOCK_STATEMENT",
 };
 
 const char *ast_debug_value(enum NodeType type)
@@ -38,10 +44,32 @@ void write_space(int i)
 		write(STDOUT_FILENO, " ", 1);
 }
 
+
+// TODO: make this function look good
 void print_node(struct Node *node, int i)
 {
 	switch (node->type)
 	{
+		case AST_IF_STATEMENT:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_IF_STATEMENT]);
+			printf("%*scondition:\n", ++i * DEBUG_INDENT," ");
+			print_node(node->node.if_statement.cond, i);
+			printf("%*sblock:\n", i * DEBUG_INDENT," ");
+			print_node(node->node.if_statement.block, i);
+			if (node->node.if_statement.else_block)
+			{
+				printf("%*selse_block:\n", i * DEBUG_INDENT," ");
+				print_node(node->node.if_statement.else_block, i);
+			}
+			break;
+		case AST_BLOCK_STATEMENT:
+			printf("%*s[%s]\n", i++ * DEBUG_INDENT, " ", ast_debug[AST_BLOCK_STATEMENT]);
+			for (size_t j = 0; j < vector_size(node->node.block_statement.statements); j++)
+			{
+				printf("%*s ---- %zu ----\n", i * DEBUG_INDENT, " ", j);
+				print_node(node->node.block_statement.statements[j], i);
+			}
+			break;
 		case AST_LET_STATEMENT:
 			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_LET_STATEMENT]);
 			printf("%*sidentifier:\n", ++i * DEBUG_INDENT," ");

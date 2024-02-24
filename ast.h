@@ -9,6 +9,10 @@ enum OpType {
 	BINARY_MULTIPLY,
 	BINARY_DIVIDE,
 	UNARY_MINUS,
+	BINARY_EQUAL,
+	BINARY_NOT_EQUAL,
+	BINARY_LT,
+	BINARY_GT,
 };
 
 struct LetStatement {
@@ -40,6 +44,16 @@ struct ListExpression {
 	struct Node **list;
 };
 
+struct IfStatement {
+	struct Node *cond;
+	struct Node *block;
+	struct Node *else_block;
+};
+
+struct BlockStatement {
+	struct Node **statements;
+};
+
 struct UnaryOp {
 	enum OpType op;
 	struct Node *value;
@@ -63,6 +77,8 @@ enum NodeType {
 	AST_ARRAY_ACCESS,
 	AST_FUNCTION_CALL,
 	AST_LIST_EXPRESSION,
+	AST_IF_STATEMENT,
+	AST_BLOCK_STATEMENT,
 };
 
 struct Node {
@@ -77,6 +93,8 @@ struct Node {
 		struct ArrayAccess array_access;
 		struct FunctionCall function_call;
 		struct ListExpression list_expression;
+		struct IfStatement if_statement;
+		struct BlockStatement block_statement;
 	} node;
 };
 
