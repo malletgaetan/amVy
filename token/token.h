@@ -1,8 +1,8 @@
 #ifndef TOKEN_H
 # define TOKEN_H
 
-# include "types.h"
-# include "string.h"
+# include "libs/types.h"
+# include "libs/string.h"
 
 enum TokenType {
 	TOKEN_EOF,
@@ -16,6 +16,7 @@ enum TokenType {
 	TOKEN_MINUS,
 	TOKEN_ASTERISK,
 	TOKEN_SLASH,
+	TOKEN_MODULO,
 
 	TOKEN_EQUAL,
 	TOKEN_NOT_EQUAL,

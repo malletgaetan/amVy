@@ -2,7 +2,7 @@
 # define LEXER_H
 
 # include <stddef.h>
-# include "types.h"
+# include "libs/types.h"
 
 struct Lexer {
 	char *input;
@@ -10,7 +10,7 @@ struct Lexer {
 	size_t next_index;
 };
 
-bool lexer_init(struct Lexer *lexer, char *filepath);
+void lexer_init(struct Lexer *lexer, char *file_content);
 void lexer_destroy(struct Lexer *lexer);
 struct Token lexer_next_token(struct Lexer *lexer);
 

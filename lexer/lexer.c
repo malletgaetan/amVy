@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lexer.h"
-#include "token.h"
-#include "types.h"
-#include "string.h"
+#include "lexer/lexer.h"
+#include "token/token.h"
+#include "libs/types.h"
+#include "libs/string.h"
 
 static bool is_letter(char c)
 {
@@ -81,29 +81,11 @@ static void skip_whitespaces(struct Lexer *lexer)
 		++lexer->next_index;
 }
 
-bool lexer_init(struct Lexer *lexer, char *filepath)
+void lexer_init(struct Lexer *lexer, char *file_content)
 {
-	FILE *file;
-	long fsize;
-
-	if ((file = fopen(filepath, "rb")) == NULL)
-		return (True);
-	fseek(file, 0, SEEK_END);
-	if ((fsize = ftell(file)) == -1)
-		goto fail_close;
-	fseek(file, 0, SEEK_SET);
-	lexer->input = malloc(sizeof(char) * (fsize + 1));
-	if (lexer->input == NULL)
-		goto fail_close;
-	fread(lexer->input, fsize, 1, file); // TODO: error check
-	fclose(file);
-	lexer->input[(size_t)fsize] = '\0';
+	lexer->input = file_content;
 	lexer->index = 0;
 	lexer->next_index = 0;
-	return False;
-fail_close:
-	fclose(file);
-	return True;
 }
 
 void lexer_destroy(struct Lexer *lexer)
@@ -139,6 +121,8 @@ struct Token lexer_next_token(struct Lexer *lexer)
 			return new_token(lexer, TOKEN_ASTERISK);
 		case '/':
 			return new_token(lexer, TOKEN_SLASH);
+		case '%':
+			return new_token(lexer, TOKEN_MODULO);
 		case '>':
 			return new_token(lexer, TOKEN_GREATER);
 		case '<':

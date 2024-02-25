@@ -1,11 +1,11 @@
+#include <assert.h>
 #include <stdio.h>
 
-#include "token.h"
-#include "lexer.h"
-#include "parser.h"
-#include "vector.h"
-#include "assert.h"
-#include "types.h"
+#include "libs/vector.h"
+#include "libs/types.h"
+#include "token/token.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 
 
 // TODO: improve performance by using an arena allocator instead of plain malloc
@@ -20,6 +20,7 @@ static int	token_precedence[TOKEN_LIMIT] =
 	[TOKEN_MINUS] = 10,
 	[TOKEN_ASTERISK] = 20,
 	[TOKEN_SLASH] = 20,
+	[TOKEN_MODULO] = 20,
 	[TOKEN_ASSIGN] = 4,
 	[TOKEN_EQUAL] = 5,
 	[TOKEN_NOT_EQUAL] = 5,
@@ -43,8 +44,8 @@ int	nzatoi(struct String string)
 	return (count * sign);
 }
 
-static struct Node *parseExpression(struct Parser *parser, int precedence);
-static struct Node **parseStatementsUntil(struct Parser *parser, enum TokenType end);
+static struct AstNode *parseExpression(struct Parser *parser, int precedence);
+static struct AstNode **parseStatementsUntil(struct Parser *parser, enum TokenType end);
 
 static void next_token(struct Parser *parser)
 {
@@ -54,30 +55,30 @@ static void next_token(struct Parser *parser)
 	assert(parser->next_token.type != TOKEN_UNKNOWN);
 }
 
-static struct Node *parseInteger(struct Parser *parser)
+static struct AstNode *parseInteger(struct Parser *parser)
 {
 	assert(parser->token.type == TOKEN_INTEGER);
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_INTEGER_LITERAL;
 	node->node.integer_literal.value = nzatoi(parser->token.literal);
 	return node;
 }
 
-static struct Node *parseIdentifier(struct Parser *parser)
+static struct AstNode *parseIdentifier(struct Parser *parser)
 {
 	assert(parser->token.type == TOKEN_IDENTIFIER);
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_IDENTIFIER;
 	node->node.identifier.name = parser->token.literal;
 	return node;
 }
 
-static struct Node *parseArrayAccessExpression(struct Parser *parser, struct Node *left)
+static struct AstNode *parseArrayAccessExpression(struct Parser *parser, struct AstNode *left)
 {
 	assert(parser->token.type == TOKEN_LBRACKET);
-	struct Node *expr = malloc(sizeof(struct Node));
+	struct AstNode *expr = malloc(sizeof(struct AstNode));
 	assert(expr);
 
 	// TODO: maybe create a special IndexAccess struct for clearer source code
@@ -90,9 +91,9 @@ static struct Node *parseArrayAccessExpression(struct Parser *parser, struct Nod
 	return expr;
 }
 
-static struct Node *parseListExpression(struct Parser *parser, enum TokenType end)
+static struct AstNode *parseListExpression(struct Parser *parser, enum TokenType end)
 {
-	struct Node *list_expr = malloc(sizeof(struct Node));
+	struct AstNode *list_expr = malloc(sizeof(struct AstNode));
 	assert(list_expr);
 
 	list_expr->type = AST_LIST_EXPRESSION;
@@ -103,7 +104,7 @@ static struct Node *parseListExpression(struct Parser *parser, enum TokenType en
 	
 	while (1)
 	{
-		struct Node *expr = parseExpression(parser, 0);
+		struct AstNode *expr = parseExpression(parser, 0);
 		assert(expr);
 		vector_add(list_expr->node.list_expression.list, expr);
 		next_token(parser);
@@ -116,9 +117,9 @@ static struct Node *parseListExpression(struct Parser *parser, enum TokenType en
 	return list_expr;
 }
 
-static struct Node *parseFunctionCallExpression(struct Parser *parser, struct Node *left)
+static struct AstNode *parseFunctionCallExpression(struct Parser *parser, struct AstNode *left)
 {
-	struct Node *expr = malloc(sizeof(struct Node));
+	struct AstNode *expr = malloc(sizeof(struct AstNode));
 	assert(expr);
 
 	// TODO: maybe create a special IndexAccess struct for clearer source code
@@ -130,7 +131,7 @@ static struct Node *parseFunctionCallExpression(struct Parser *parser, struct No
 	return expr;
 }
 
-static struct Node *parseInfixExpression(struct Parser *parser, struct Node *left)
+static struct AstNode *parseInfixExpression(struct Parser *parser, struct AstNode *left)
 {
 	enum OpType op;
 	switch (parser->token.type)
@@ -146,6 +147,9 @@ static struct Node *parseInfixExpression(struct Parser *parser, struct Node *lef
 			break;
 		case TOKEN_SLASH:
 			op = BINARY_DIVIDE;
+			break;
+		case TOKEN_MODULO:
+			op = BINARY_MODULO;
 			break;
 		case TOKEN_ASSIGN:
 			op = BINARY_ASSIGN;
@@ -173,7 +177,7 @@ static struct Node *parseInfixExpression(struct Parser *parser, struct Node *lef
 			printf("%s\n", token_debug_value(parser->token.type));
 			assert(NULL);
 	}
-	struct Node *expr = malloc(sizeof(struct Node));
+	struct AstNode *expr = malloc(sizeof(struct AstNode));
 	assert(expr);
 	expr->type = AST_BINARY_OP;
 	expr->node.binary_op.left = left;
@@ -184,17 +188,17 @@ static struct Node *parseInfixExpression(struct Parser *parser, struct Node *lef
 	return expr;
 }
 
-static struct Node *parseGroupedExpression(struct Parser *parser)
+static struct AstNode *parseGroupedExpression(struct Parser *parser)
 {
 	assert(parser->token.type == TOKEN_LPAREN);
 	next_token(parser);
-	struct Node *expr = parseExpression(parser, 0);
+	struct AstNode *expr = parseExpression(parser, 0);
 	next_token(parser);
 	assert(parser->token.type == TOKEN_RPAREN);
 	return expr;
 }
 
-static struct Node *parsePrefixExpression(struct Parser *parser)
+static struct AstNode *parsePrefixExpression(struct Parser *parser)
 {
 	enum OpType op;
 
@@ -213,7 +217,7 @@ static struct Node *parsePrefixExpression(struct Parser *parser)
 			printf("%s\n", token_debug_value(parser->token.type));
 			assert(NULL);
 	}
-	struct Node *expr = malloc(sizeof(struct Node));
+	struct AstNode *expr = malloc(sizeof(struct AstNode));
 	assert(expr);
 	expr->type = AST_UNARY_OP;
 	int precedence = token_precedence[parser->token.type];
@@ -223,9 +227,9 @@ static struct Node *parsePrefixExpression(struct Parser *parser)
 	return expr;
 }
 
-static struct Node *parseExpression(struct Parser *parser, int precedence)
+static struct AstNode *parseExpression(struct Parser *parser, int precedence)
 {
-	struct Node *left = parsePrefixExpression(parser);
+	struct AstNode *left = parsePrefixExpression(parser);
 
 	// && printf("test on %s\n", token_debug_value(parser->next_token.type))
 	while (parser->token.type != TOKEN_SEMICOLON && precedence < token_precedence[parser->next_token.type])
@@ -236,9 +240,9 @@ static struct Node *parseExpression(struct Parser *parser, int precedence)
 	return left;
 }
 
-static struct Node *parseLetStatement(struct Parser *parser)
+static struct AstNode *parseLetStatement(struct Parser *parser)
 {
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_LET_STATEMENT;
 
@@ -256,9 +260,9 @@ static struct Node *parseLetStatement(struct Parser *parser)
 	return node;
 }
 
-static struct Node *parseReturnStatement(struct Parser *parser)
+static struct AstNode *parseReturnStatement(struct Parser *parser)
 {
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_RETURN_STATEMENT;
 	next_token(parser);
@@ -268,9 +272,9 @@ static struct Node *parseReturnStatement(struct Parser *parser)
 	return node;
 }
 
-static struct Node *parseBlockStatement(struct Parser *parser)
+static struct AstNode *parseBlockStatement(struct Parser *parser)
 {
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 
 	assert(parser->token.type == TOKEN_LBRACE);
@@ -282,10 +286,10 @@ static struct Node *parseBlockStatement(struct Parser *parser)
 	return node;
 }
 
-static struct Node *parseIfStatement(struct Parser *parser)
+static struct AstNode *parseIfStatement(struct Parser *parser)
 {
 	assert(parser->token.type == TOKEN_IF);
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	node->type = AST_IF_STATEMENT;
 	node->node.if_statement.else_block = NULL;
 	next_token(parser);
@@ -311,11 +315,11 @@ static struct Node *parseIfStatement(struct Parser *parser)
 	return node;
 }
 
-static struct Node *parseFunctionDefinition(struct Parser *parser)
+static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 {
 	assert(parser->token.type == TOKEN_FUNCTION);
 	// TODO: each new node allocation should init all fields (NULL init)
-	struct Node *node = malloc(sizeof(struct Node));
+	struct AstNode *node = malloc(sizeof(struct AstNode));
 	node->type = AST_FUNCTION_DEFINITION;
 	node->node.function_definition.parameters = NULL;
 	node->node.function_definition.block = NULL;
@@ -330,7 +334,7 @@ static struct Node *parseFunctionDefinition(struct Parser *parser)
 	{
 		if (parser->token.type == TOKEN_COMMA)
 			next_token(parser);
-		struct Node *identifier = parseIdentifier(parser);
+		struct AstNode *identifier = parseIdentifier(parser);
 		vector_add(node->node.function_definition.parameters, identifier);
 		next_token(parser);
 	}
@@ -339,9 +343,9 @@ static struct Node *parseFunctionDefinition(struct Parser *parser)
 	return (node);
 }
 
-static struct Node *parseStatement(struct Parser *parser)
+static struct AstNode *parseStatement(struct Parser *parser)
 {
-	struct Node *statement;
+	struct AstNode *statement;
 
 	switch (parser->token.type)
 	{
@@ -364,10 +368,10 @@ static struct Node *parseStatement(struct Parser *parser)
 	return statement;
 }
 
-static struct Node **parseStatementsUntil(struct Parser *parser, enum TokenType end)
+static struct AstNode **parseStatementsUntil(struct Parser *parser, enum TokenType end)
 {
-	struct Node *statement;
-	struct Node **statements = NULL;
+	struct AstNode *statement;
+	struct AstNode **statements = NULL;
 
 	do {
 		statement = parseStatement(parser);
@@ -387,12 +391,11 @@ struct Program parser_parse(struct Parser *parser)
 	return program;
 }
 
-bool parser_init(struct Parser *parser, char *filepath)
+void parser_init(struct Parser *parser, char *file_content)
 {
-	bool ret = lexer_init(&parser->lexer, filepath);
+	lexer_init(&parser->lexer, file_content);
 	next_token(parser);
 	next_token(parser);
-	return (ret);
 }
 
 void parser_destroy(struct Parser *parser)

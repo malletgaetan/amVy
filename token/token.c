@@ -1,6 +1,6 @@
 #include "token.h"
 
-char *token_debug[] = 
+char *token_debug[TOKEN_LIMIT] = 
 {
 	[TOKEN_EOF] = "EOF",
 	[TOKEN_UNKNOWN] = "UNKNOWN",

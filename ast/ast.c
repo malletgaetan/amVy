@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "vector.h"
-#include "string.h"
-#include "ast.h"
+#include "libs/vector.h"
+#include "libs/string.h"
+#include "ast/ast.h"
 
 #define DEBUG_INDENT 5
 
@@ -11,6 +11,7 @@ char *op_debug[] =
 	[BINARY_MINUS] = "BINARY -",
 	[BINARY_MULTIPLY] = "BINARY *",
 	[BINARY_DIVIDE] = "BINARY /",
+	[BINARY_MODULO] = "BINARY %",
 	[UNARY_MINUS] = "UNARY -",
 	[BINARY_EQUAL] = "==",
 	[BINARY_NOT_EQUAL] = "!=",
@@ -48,7 +49,7 @@ void write_space(int i)
 
 
 // TODO: make this function look good
-void print_node(struct Node *node, int i)
+void print_node(struct AstNode *node, int i)
 {
 	switch (node->type)
 	{

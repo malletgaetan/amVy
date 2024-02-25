@@ -1,13 +1,14 @@
 #ifndef AST_H
 # define AST_H
 
-# include "string.h"
+# include "libs/string.h"
 
 enum OpType {
 	BINARY_ADD,
 	BINARY_MINUS,
 	BINARY_MULTIPLY,
 	BINARY_DIVIDE,
+	BINARY_MODULO,
 	UNARY_MINUS,
 	BINARY_EQUAL,
 	BINARY_NOT_EQUAL,
@@ -17,53 +18,53 @@ enum OpType {
 };
 
 struct LetStatement {
-	struct Node *identifier;
-	struct Node *value;
+	struct AstNode *identifier;
+	struct AstNode *value;
 };
 
 struct ReturnStatement {
-	struct Node *expr;
+	struct AstNode *expr;
 };
 
 struct BinaryOp {
-	struct Node *left;
+	struct AstNode *left;
 	enum OpType op;
-	struct Node *right;
+	struct AstNode *right;
 };
 
 struct ArrayAccess {
-	struct Node *identifier;
-	struct Node *index;
+	struct AstNode *identifier;
+	struct AstNode *index;
 };
 
 struct FunctionCall {
-	struct Node *identifier;
-	struct Node *arguments;
+	struct AstNode *identifier;
+	struct AstNode *arguments;
 };
 
 struct FunctionDefinition {
-	struct Node *identifier;
-	struct Node **parameters;
-	struct Node *block;
+	struct AstNode *identifier;
+	struct AstNode **parameters;
+	struct AstNode *block;
 };
 
 struct ListExpression {
-	struct Node **list;
+	struct AstNode **list;
 };
 
 struct IfStatement {
-	struct Node *cond;
-	struct Node *block;
-	struct Node *else_block;
+	struct AstNode *cond;
+	struct AstNode *block;
+	struct AstNode *else_block;
 };
 
 struct BlockStatement {
-	struct Node **statements;
+	struct AstNode **statements;
 };
 
 struct UnaryOp {
 	enum OpType op;
-	struct Node *value;
+	struct AstNode *value;
 };
 
 struct Identifier {
@@ -89,7 +90,7 @@ enum NodeType {
 	AST_FUNCTION_DEFINITION,
 };
 
-struct Node {
+struct AstNode {
 	enum NodeType type;
 	union {
 		struct LetStatement let_statement;
@@ -108,10 +109,10 @@ struct Node {
 };
 
 struct Program {
-	struct Node **statements;
+	struct AstNode **statements;
 };
 
 const char *ast_debug_value(enum NodeType type);
-void print_node(struct Node *node, int i);
+void print_node(struct AstNode *node, int i);
 
 #endif
