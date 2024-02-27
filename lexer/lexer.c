@@ -4,25 +4,24 @@
 
 #include "lexer/lexer.h"
 #include "token/token.h"
-#include "libs/types.h"
 #include "libs/string.h"
 
-static bool is_letter(char c)
+static char is_letter(char c)
 {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-static bool is_digit(char c)
+static char is_digit(char c)
 {
 	return (c >= '0' && c <= '9');
 }
 
-static bool is_space(char c)
+static char is_space(char c)
 {
 	return (c == ' ' || (c > 8 && c < 14));
 }
 
-static bool is_identifier(char c)
+static char is_identifier(char c)
 {
 	return c == '_' || is_letter(c);
 }

@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "libs/vector.h"
-#include "libs/types.h"
 #include "token/token.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
@@ -325,6 +324,7 @@ static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 	node->node.function_definition.block = NULL;
 
 	next_token(parser);
+	assert(parser->token.type == TOKEN_IDENTIFIER);
 	node->node.function_definition.identifier = parseIdentifier(parser);
 	next_token(parser);
 	assert(parser->token.type == TOKEN_LPAREN);

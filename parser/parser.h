@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 # define PARSER_H
 
-# include "libs/types.h"
 # include "ast/ast.h"
 # include "lexer/lexer.h"
 # include "token/token.h"

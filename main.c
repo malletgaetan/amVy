@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "evaluator/evaluator.h"
 #include "libs/vector.h"
 #include "parser/parser.h"
 #include "ast/ast.h"
@@ -49,12 +50,11 @@ int main(int ac, char **av)
 	parser_init(&parser, file_content);
 
 	program = parser_parse(&parser);
-	for (unsigned int i = 0; i < vector_size(program.statements); i++)
-	{
-		print_node(program.statements[i], 0);
-	}
-	parser_destroy(&parser);
-
+	/* for (unsigned int i = 0; i < vector_size(program.statements); i++) */
+	/* { */
+	/* 	print_node(program.statements[i], 0); */
+	/* } */
+	evaluator_eval(program);
 	return (0);
 }
 

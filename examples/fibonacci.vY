@@ -5,6 +5,5 @@ fn fibonacci(n) {
 	return fibonacci(n - 2) + fibonacci(n - 1);
 }
 
-let res = 0;
-res = fibonacci(10);
+let res = fibonacci(10);
 print(res);

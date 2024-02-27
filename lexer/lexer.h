@@ -2,7 +2,6 @@
 # define LEXER_H
 
 # include <stddef.h>
-# include "libs/types.h"
 
 struct Lexer {
 	char *input;

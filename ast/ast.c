@@ -133,7 +133,7 @@ void print_node(struct AstNode *node, int i)
 			break;
 		case AST_IDENTIFIER:
 			write_space(i * DEBUG_INDENT);
-			printf("[%s]\n", ast_debug[AST_INTEGER_LITERAL]);
+			printf("[%s]\n", ast_debug[AST_IDENTIFIER]);
 			write_space(++i * DEBUG_INDENT);
 			write(STDOUT_FILENO, "name: ", 6);
 			put_string(node->node.identifier.name);

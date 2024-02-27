@@ -1,7 +1,7 @@
 #include "libs/string.h"
 
-void put_string(struct String string)
+int put_string(struct String string)
 {
-	write(STDOUT_FILENO, string.str, string.size);
+	return write(STDOUT_FILENO, string.str, string.size);
 }
 

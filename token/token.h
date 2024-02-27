@@ -1,7 +1,6 @@
 #ifndef TOKEN_H
 # define TOKEN_H
 
-# include "libs/types.h"
 # include "libs/string.h"
 
 enum TokenType {
