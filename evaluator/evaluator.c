@@ -6,10 +6,6 @@
 #include "libs/string.h"
 #include "evaluator/evaluator.h"
 
-// TODO: make a small stack tracer for debugging purpose
-// TODO: clean errors messages
-// TODO: use array lookup instead of switch?
-
 char *eval_debug[] = {
 	[VALUE_INTEGER] = "INTEGER",
 	[VALUE_FUNCTION] = "FUNCTION",
@@ -79,7 +75,6 @@ static struct EvalValue evalBinaryOp(struct AstNode *node, struct hashmap *conte
 
 	binaryOpTypeCheck(left, right);
 
-	// TODO: performance wouldn't understand
 	switch (node->node.binary_op.op)
 	{
 		case BINARY_ADD:
@@ -236,7 +231,6 @@ static struct EvalValue printBuiltin(struct AstNode *node, struct hashmap *conte
 
 static struct EvalValue evalFunctionCall(struct AstNode *node, struct hashmap *context)
 {
-	// TODO: every function create his own context for the moment, but will inherit context after
 	assert(node);
 	assert(context);
 	assert(node->type == AST_FUNCTION_CALL);

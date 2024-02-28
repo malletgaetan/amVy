@@ -19,3 +19,11 @@ fn fibonacci(n) {
 let res = fibonacci(10);
 print(res);
 ```
+
+## TODO
+
+- [ ] add context transfer between function caller and callee
+- [ ] nice error message (lexer / parser / evaluator)
+- [ ] debug internal stack trace
+- [ ] create same language but 100% stack based, no malloc and compiled
+- [ ] use array lookup instead of switchs
