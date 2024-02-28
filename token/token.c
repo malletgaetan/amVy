@@ -31,8 +31,6 @@ char *token_debug[TOKEN_LIMIT] =
 
 	[TOKEN_FUNCTION] = "FUNCTION",
 	[TOKEN_LET] = "LET",
-	[TOKEN_TRUE] = "TRUE", // TODO: maybe get rid of booleans, just like in C
-	[TOKEN_FALSE] = "FALSE",
 	[TOKEN_IF] = "IF",
 	[TOKEN_ELSE] = "ELSE",
 	[TOKEN_RETURN] = "RETURN",

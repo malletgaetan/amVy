@@ -35,8 +35,6 @@ enum TokenType {
 	// keywords
 	TOKEN_FUNCTION,
 	TOKEN_LET,
-	TOKEN_TRUE, // TODO: maybe get rid of booleans, just like in C
-	TOKEN_FALSE,
 	TOKEN_IF,
 	TOKEN_ELSE,
 	TOKEN_RETURN,
