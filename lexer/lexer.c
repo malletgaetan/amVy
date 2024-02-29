@@ -73,7 +73,11 @@ static struct Token new_integer(struct Lexer *lexer)
 static void skip_whitespaces(struct Lexer *lexer)
 {
 	while (lexer->input[lexer->index] && is_space(lexer->input[lexer->next_index]))
+	{
+		if (lexer->input[lexer->index] == '\n')
+			lexer->line++;
 		++lexer->next_index;
+	}
 }
 
 void lexer_init(struct Lexer *lexer, char *file_content)
@@ -81,6 +85,7 @@ void lexer_init(struct Lexer *lexer, char *file_content)
 	lexer->input = file_content;
 	lexer->index = 0;
 	lexer->next_index = 0;
+	lexer->line = 0;
 }
 
 void lexer_destroy(struct Lexer *lexer)

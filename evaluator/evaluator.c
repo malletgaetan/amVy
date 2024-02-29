@@ -3,12 +3,16 @@
 #include <stdio.h>
 #include <assert.h>
 #include <libs/vector.h>
+#include "libs/tracer.h"
 #include "libs/string.h"
 #include "evaluator/evaluator.h"
+
+# define EVAL_TRACER "eval"
 
 char *eval_debug[] = {
 	[VALUE_INTEGER] = "INTEGER",
 	[VALUE_FUNCTION] = "FUNCTION",
+	[VALUE_NONE] = "NONE",
 };
 
 
@@ -27,8 +31,6 @@ int user_compare(const void *a, const void *b, void *udata) {
 bool user_iter(const void *item, void *udata) {
 	(void)item;
 	(void)udata;
-    /* const struct user *user = item; */
-    /* printf("%s (age=%d)\n", user->name, user->age); */
     return true;
 }
 
@@ -39,6 +41,7 @@ uint64_t user_hash(const void *item, uint64_t seed0, uint64_t seed1) {
 
 static void binaryOpTypeCheck(struct EvalValue left, struct EvalValue right)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	if (left.type == VALUE_INTEGER && right.type == VALUE_INTEGER)
 		return ;
 	printf("runtime_error: invalid arithmetic operation between '%s' and '%s' values\n", eval_debug[left.type], eval_debug[left.type]);
@@ -47,6 +50,7 @@ static void binaryOpTypeCheck(struct EvalValue left, struct EvalValue right)
 
 static void expectIdentifier(struct AstNode *node)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	if (node->type == AST_IDENTIFIER)
 		return ;
@@ -56,6 +60,7 @@ static void expectIdentifier(struct AstNode *node)
 
 static struct EvalValue evalBinaryOp(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 
@@ -113,6 +118,7 @@ static struct EvalValue evalBinaryOp(struct AstNode *node, struct hashmap *conte
 
 static struct EvalValue evalIdentifier(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_IDENTIFIER);
@@ -134,6 +140,7 @@ static struct EvalValue evalIdentifier(struct AstNode *node, struct hashmap *con
 
 static struct EvalValue evalUnaryOp(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 
 	struct EvalValue val = evalExpression(node->node.unary_op.value, context);
@@ -149,6 +156,7 @@ static struct EvalValue evalUnaryOp(struct AstNode *node, struct hashmap *contex
 
 static struct EvalValue evalIntegerLiteral(struct AstNode *node)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 
 	struct EvalValue val;
@@ -160,6 +168,7 @@ static struct EvalValue evalIntegerLiteral(struct AstNode *node)
 
 static struct BlockEvalValue evalIfStatement(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_IF_STATEMENT);
@@ -182,6 +191,7 @@ static struct BlockEvalValue evalIfStatement(struct AstNode *node, struct hashma
 
 static struct EvalValue evalFunctionDefinition(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_FUNCTION_DEFINITION);
@@ -197,6 +207,7 @@ static struct EvalValue evalFunctionDefinition(struct AstNode *node, struct hash
 
 static struct EvalValue printBuiltin(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_FUNCTION_CALL);
@@ -231,10 +242,10 @@ static struct EvalValue printBuiltin(struct AstNode *node, struct hashmap *conte
 
 static struct EvalValue evalFunctionCall(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_FUNCTION_CALL);
-
 
 	struct String fn_string = node->node.function_call.identifier->node.identifier.name;
 	if (fn_string.size == 5 && strncmp(fn_string.str, "print", 5) == 0)
@@ -274,6 +285,7 @@ static struct EvalValue evalFunctionCall(struct AstNode *node, struct hashmap *c
 // never returns NULL, should crash before
 static struct EvalValue evalExpression(struct AstNode *node,  struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	switch (node->type)
 	{
 		case AST_IDENTIFIER:
@@ -298,6 +310,7 @@ static struct EvalValue evalExpression(struct AstNode *node,  struct hashmap *co
 
 static struct EvalValue evalLetStatement(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_LET_STATEMENT);
@@ -311,6 +324,7 @@ static struct EvalValue evalLetStatement(struct AstNode *node, struct hashmap *c
 
 static struct BlockEvalValue evalBlockStatement(struct AstNode *node, struct hashmap *context)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	assert(node);
 	assert(context);
 	assert(node->type == AST_BLOCK_STATEMENT);
@@ -347,6 +361,7 @@ static struct BlockEvalValue evalBlockStatement(struct AstNode *node, struct has
 
 void evaluator_eval(struct Program program)
 {
+	trace("%s: %s", EVAL_TRACER, __func__);
 	struct hashmap *context = hashmap_new(sizeof(struct EvalValueMap), 0, 0, 0, user_hash, user_compare, NULL, NULL);
 	struct EvalValue val;
 	for (size_t i = 0; i < vector_size(program.statements); i++)
@@ -357,7 +372,7 @@ void evaluator_eval(struct Program program)
 				val = evalLetStatement(program.statements[i], context);
 				continue ;
 			case AST_IF_STATEMENT:
-				evalLetStatement(program.statements[i], context);
+				evalIfStatement(program.statements[i], context);
 				continue ;
 			case AST_FUNCTION_DEFINITION:
 				evalFunctionDefinition(program.statements[i], context);

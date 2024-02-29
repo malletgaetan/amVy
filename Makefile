@@ -1,6 +1,6 @@
 NAME = amVy
 CC = clang
-CFLAGS = -Wall -Werror -Wextra -I .
+CFLAGS = -Wall -Werror -Wextra -std=gnu99 -I .
 RM = rm -f
 
 _SRCS=$(shell find . -name '*.c' ! -name "*.test.c" ! -name "main.c")
@@ -9,6 +9,10 @@ SRCS=$(_SRCS) main.c
 _OBJS=$(_SRCS:.c=.o)
 OBJS=$(SRCS:.c=.o)
 
+ifeq ($(MAKECMDGOALS), debug)
+  CFLAGS += -D DEBUG
+endif
+
 all: $(NAME)
 
 $(NAME): $(SRCS)
@@ -16,6 +20,8 @@ $(NAME): $(SRCS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $(<:.c=.o)
+
+debug: fclean $(NAME)
 
 lexer_tests: $(_OBJS)
 	$(CC) $(CFLAGS) -c lexer/lexer.test.c -o lexer/lexer.test.o
@@ -33,4 +39,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re tests lexer_tests
+.PHONY: all clean fclean re tests lexer_tests debug

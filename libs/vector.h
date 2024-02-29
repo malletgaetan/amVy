@@ -15,9 +15,9 @@ typedef struct {
 {																																									\
 	if ((arr) == NULL)																																				\
 	{																																								\
-		(arr) = malloc((sizeof((element)) * VECTOR_BASE_SIZE) + sizeof(VectorMetadata));																							\
+		(arr) = malloc((sizeof((element)) * VECTOR_BASE_SIZE) + sizeof(VectorMetadata));																			\
 		assert(arr);																																				\
-		((VectorMetadata *)(arr))[0].capacity = VECTOR_BASE_SIZE;																													\
+		((VectorMetadata *)(arr))[0].capacity = VECTOR_BASE_SIZE;																									\
 		((VectorMetadata *)(arr))[0].len = 1;																														\
 		(arr) = (typeof(element) *)(((VectorMetadata *)(arr)) + 1);																									\
 		((typeof(element) *)(arr))[0] = (element);																													\
@@ -35,7 +35,7 @@ typedef struct {
 	}																																								\
 }
 
-# define vector_destroy(arr) free(((VectorMetadata *)(arr)) - 1)
+# define vector_destroy(arr) ((arr == NULL) ? ((void)arr): free(((VectorMetadata *)(arr)) - 1))
 
 # define vector_size(arr) ((arr == NULL) ? 0 : ((VectorMetadata *)(arr))[-1].len)
 

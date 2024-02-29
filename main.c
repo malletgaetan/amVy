@@ -1,10 +1,17 @@
 #include <stdio.h>
+#include <string.h>
 #include "evaluator/evaluator.h"
 #include "libs/vector.h"
+#include "libs/tracer.h"
 #include "parser/parser.h"
 #include "ast/ast.h"
 
-char *get_file_content(const char *filepath)
+struct {
+	int ast;
+	const char *filepath;
+} args;
+
+static char *get_file_content(const char *filepath)
 {
 	char *content;
 	FILE *file;
@@ -28,33 +35,54 @@ fail_close:
 	return NULL;
 }
 
+static void print_helper(const char *filepath)
+{
+	printf("usage: ./%s <amVy file>\n", filepath);
+	printf("options:\n");
+	printf("--ast: print ast\n");
+	exit(0);
+}
+
+static void parse_arguments(int ac, char **av)
+{
+	if (ac == 1)
+		print_helper(av[0]);
+	for (int i = 0; i < ac; i++) {
+		if (av[i][0] == '-' && av[i][1] == '-') {
+			if (strcmp(av[i], "ast"))
+				args.ast = 1;
+		} else {
+			args.filepath = av[i];
+		}
+	}
+}
+
 int main(int ac, char **av)
 {
 	char *file_content;
 	struct Parser parser;
 	struct Program program;
 
-	if (ac < 2)
-	{
-		printf("usage: ./%s <amVy file>\n", av[0]);
-		return (1);
-	}
-
-	file_content = get_file_content(av[1]);
+	parse_arguments(ac, av);
+	file_content = get_file_content(args.filepath);
 	if (file_content == NULL)
 	{
-		printf("failed to open %s\n", av[1]);
+		printf("failed to open %s\n", args.filepath);
 		return (1);
 	}
-
 	parser_init(&parser, file_content);
-
 	program = parser_parse(&parser);
-	/* for (unsigned int i = 0; i < vector_size(program.statements); i++) */
-	/* { */
-	/* 	print_node(program.statements[i], 0); */
-	/* } */
+	if (args.ast) {
+		for (unsigned int i = 0; i < vector_size(program.statements); i++)
+		{
+			print_node(program.statements[i], 0);
+		}
+		goto quit;
+	}
 	evaluator_eval(program);
+	quit:
+	parser_destroy(&parser);
+	trace_clear();
 	return (0);
 }
 
