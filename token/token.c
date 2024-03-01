@@ -34,6 +34,7 @@ char *token_debug[TOKEN_LIMIT] =
 	[TOKEN_IF] = "IF",
 	[TOKEN_ELSE] = "ELSE",
 	[TOKEN_RETURN] = "RETURN",
+	[TOKEN_WHILE] = "WHILE",
 };
 
 const char *token_debug_value(enum TokenType type)

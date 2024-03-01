@@ -34,6 +34,7 @@ char *ast_debug[] =
 	[AST_IF_STATEMENT] = "AST_IF_STATEMENT",
 	[AST_BLOCK_STATEMENT] = "AST_BLOCK_STATEMENT",
 	[AST_FUNCTION_DEFINITION] = "AST_FUNCTION_DEFINITION",
+	[AST_WHILE_STATEMENT] = "AST_WHILE_STATEMENT",
 };
 
 const char *ast_debug_value(enum NodeType type)
@@ -83,6 +84,12 @@ void print_node(struct AstNode *node, int i)
 				print_node(node->node.if_statement.else_block, i);
 			}
 			break;
+		case AST_WHILE_STATEMENT:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_WHILE_STATEMENT]);
+			printf("%*scondition:\n", ++i * DEBUG_INDENT," ");
+			print_node(node->node.while_statement.cond, i);
+			printf("%*sblock:\n", i * DEBUG_INDENT," ");
+			print_node(node->node.while_statement.block, i);
 		case AST_BLOCK_STATEMENT:
 			printf("%*s[%s]\n", i++ * DEBUG_INDENT, " ", ast_debug[AST_BLOCK_STATEMENT]);
 			for (size_t j = 0; j < vector_size(node->node.block_statement.statements); j++)

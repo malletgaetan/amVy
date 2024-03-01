@@ -193,6 +193,30 @@ static struct BlockEvalValue evalIfStatement(struct AstNode *node, struct hashma
 	return ret;
 }
 
+static struct BlockEvalValue evalWhileStatement(struct AstNode *node, struct hashmap *context)
+{
+	trace("%s: %s(%s)", EVAL_TRACER, __func__, ast_debug_value(node->type));
+	assert(node);
+	assert(context);
+	assert(node->type == AST_WHILE_STATEMENT);
+
+	struct BlockEvalValue ret;
+	struct EvalValue cond;
+	ret.type = BLOCK_NO_RETURN;
+	
+	while (1) {
+		cond = evalExpression(node->node.if_statement.cond, context);
+		if (cond.type != VALUE_INTEGER)
+			runtime_error("condition expression expected '%s', got '%s'", value_debug[VALUE_INTEGER], value_debug[cond.type]);
+		if (!cond.value.integer)
+			break ; // stop execution because condition not satisfied
+		ret = evalBlockStatement(node->node.while_statement.block, context);
+		if (ret.type == BLOCK_RETURN)
+			break ; // stop execution because return statement inside while
+	}
+	return ret;
+}
+
 static struct EvalValue evalFunctionDefinition(struct AstNode *node, struct hashmap *context)
 {
 	trace("%s: %s(%s)", EVAL_TRACER, __func__, ast_debug_value(node->type));
@@ -330,6 +354,7 @@ static struct BlockEvalValue evalBlockStatement(struct AstNode *node, struct has
 
 	struct AstNode **statements = node->node.block_statement.statements;
 	struct BlockEvalValue ret;
+
 	ret.type = BLOCK_NO_RETURN;
 
 	for (size_t i = 0; i < vector_size(statements); i++)
@@ -341,6 +366,9 @@ static struct BlockEvalValue evalBlockStatement(struct AstNode *node, struct has
 				break ;
 			case AST_IF_STATEMENT:
 				ret = evalIfStatement(statements[i], context);
+				break ;
+			case AST_WHILE_STATEMENT:
+				ret = evalWhileStatement(statements[i], context);
 				break ;
 			case AST_FUNCTION_DEFINITION:
 				evalFunctionDefinition(statements[i], context);
@@ -369,6 +397,9 @@ void evaluator_eval(struct Program program)
 		{
 			case AST_LET_STATEMENT:
 				val = evalLetStatement(program.statements[i], context);
+				continue ;
+			case AST_WHILE_STATEMENT:
+				evalWhileStatement(program.statements[i], context);
 				continue ;
 			case AST_IF_STATEMENT:
 				evalIfStatement(program.statements[i], context);

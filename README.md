@@ -22,8 +22,7 @@ print(res);
 
 ## TODO
 
-- [ ] add while
-- [ ] display of variables name, line and column if runtime_error
+- [ ] make "return ;" and "return ()" valid
 - [ ] use array lookup instead of switchs
 - [ ] don't use hashmap OR own hashmap implementation
 - [ ] 100% stack based, interpreted first then compiled

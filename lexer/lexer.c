@@ -56,6 +56,8 @@ static struct Token new_identifier(struct Lexer *lexer)
 		token.type = TOKEN_LET;
 	else if (token.literal.size == 4 && strncmp(token.literal.str, "else", 4) == 0)
 		token.type = TOKEN_ELSE;
+	else if (token.literal.size == 5 && strncmp(token.literal.str, "while", 5) == 0)
+		token.type = TOKEN_WHILE;
 	else if (token.literal.size == 6 && strncmp(token.literal.str, "return", 6) == 0)
 		token.type = TOKEN_RETURN;
 	else
@@ -85,7 +87,7 @@ void lexer_init(struct Lexer *lexer, char *file_content)
 	lexer->input = file_content;
 	lexer->index = 0;
 	lexer->next_index = 0;
-	lexer->line = 0;
+	lexer->line = 1;
 }
 
 void lexer_destroy(struct Lexer *lexer)

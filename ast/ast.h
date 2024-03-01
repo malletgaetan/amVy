@@ -59,6 +59,11 @@ struct IfStatement {
 	struct AstNode *else_block;
 };
 
+struct WhileStatement {
+	struct AstNode *cond;
+	struct AstNode *block;
+};
+
 struct BlockStatement {
 	struct AstNode **statements;
 };
@@ -89,6 +94,7 @@ enum NodeType {
 	AST_IF_STATEMENT,
 	AST_BLOCK_STATEMENT,
 	AST_FUNCTION_DEFINITION,
+	AST_WHILE_STATEMENT,
 };
 
 struct AstNode {
@@ -106,6 +112,7 @@ struct AstNode {
 		struct IfStatement if_statement;
 		struct BlockStatement block_statement;
 		struct FunctionDefinition function_definition;
+		struct WhileStatement while_statement;
 	} node;
 };
 

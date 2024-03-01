@@ -30,6 +30,7 @@ lexer_tests: $(_OBJS)
 	$(RM) lexer_tests
 
 tests: lexer_tests
+	./e2e.sh
 
 clean:
 	$(RM) -r **/*.o

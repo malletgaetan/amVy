@@ -280,7 +280,6 @@ static struct AstNode *parseLetStatement(struct Parser *parser)
 	node->node.let_statement.identifier = parseIdentifier(parser);
 	next_token(parser);
 
-
 	expected(parser, TOKEN_ASSIGN, parser->token.type);
 
 	next_token(parser);
@@ -314,8 +313,7 @@ static struct AstNode *parseBlockStatement(struct Parser *parser)
 
 	node->type = AST_BLOCK_STATEMENT;
 	node->node.block_statement.statements = parseStatementsUntil(parser, TOKEN_RBRACE);
-	if (parser->token.type != TOKEN_RBRACE)
-		expected(parser, TOKEN_RBRACE, parser->token.type);
+	expected(parser, TOKEN_RBRACE, parser->token.type);
 	return node;
 }
 
@@ -379,6 +377,27 @@ static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 	return (node);
 }
 
+static struct AstNode *parseWhileStatement(struct Parser *parser)
+{
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
+	assert(parser->token.type == TOKEN_WHILE);
+	struct AstNode *node = malloc(sizeof(struct AstNode));
+	node->type = AST_WHILE_STATEMENT;
+	next_token(parser);
+
+	expected(parser, TOKEN_LPAREN, parser->token.type);
+	next_token(parser);
+	node->node.while_statement.cond = parseExpression(parser, 0);
+	next_token(parser);
+	expected(parser, TOKEN_RPAREN, parser->token.type);
+	next_token(parser);
+
+	expected(parser, TOKEN_LBRACE, parser->token.type);
+	node->node.while_statement.block = parseBlockStatement(parser);
+	expected(parser, TOKEN_RBRACE, parser->token.type);
+	return node;
+}
+
 static struct AstNode *parseStatement(struct Parser *parser)
 {
 	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
@@ -394,6 +413,8 @@ static struct AstNode *parseStatement(struct Parser *parser)
 			break;
 		case TOKEN_IF:
 			return parseIfStatement(parser);
+		case TOKEN_WHILE:
+			return parseWhileStatement(parser);
 		case TOKEN_FUNCTION:
 			return parseFunctionDefinition(parser);
 		default:
