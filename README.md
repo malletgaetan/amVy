@@ -1,10 +1,6 @@
 # A small and simple interpreter for amVy
 
-amVy is a simple and concise context oriented programming language
-
-> [!NOTE]
-> amVy is just a toy, don't use it
-
+amVy is a simple and concise stack oriented programming language
 
 ## Example
 
