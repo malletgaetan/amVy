@@ -40,6 +40,7 @@ struct ArrayAccess {
 struct FunctionCall {
 	struct AstNode *identifier;
 	struct AstNode *arguments;
+	int own_context;
 };
 
 struct FunctionDefinition {
@@ -113,6 +114,7 @@ struct Program {
 };
 
 const char *ast_debug_value(enum NodeType type);
+const char *op_debug_value(enum OpType type);
 void print_node(struct AstNode *node, int i);
 
 #endif

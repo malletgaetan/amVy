@@ -11,6 +11,7 @@ struct Lexer {
 };
 
 void lexer_init(struct Lexer *lexer, char *file_content);
+void lexer_zero_string(struct Lexer *lexer);
 void lexer_destroy(struct Lexer *lexer);
 struct Token lexer_next_token(struct Lexer *lexer);
 

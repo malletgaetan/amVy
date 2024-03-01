@@ -10,6 +10,7 @@ void	_trace(const char *fmt, ...)
 	size_t needed = vsnprintf((char*)NULL, 0, fmt, args) + 2;
 	va_end(args);
     char  *buffer = malloc(needed);
+	assert(needed);
 	va_start(args, fmt);
     vsprintf(buffer, fmt, args);
 	va_end(args);

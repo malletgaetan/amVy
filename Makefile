@@ -32,7 +32,7 @@ lexer_tests: $(_OBJS)
 tests: lexer_tests
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) -r **/*.o
 
 fclean: clean
 	$(RM) $(NAME)

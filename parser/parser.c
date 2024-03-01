@@ -53,21 +53,20 @@ static void expected(struct Parser *parser, enum TokenType expected, enum TokenT
 {
 	if (expected == got)
 		return ;
-	tracer_display();
+	trace_display();
 	printf("%s: expected %s, got %s at line %zu", PARSER_TRACE, token_debug_value(expected), token_debug_value(got), parser->lexer.line);
 	exit(1);
 }
 
 static void unexpected_error(struct Parser *parser, enum TokenType unexpected)
 {
-	tracer_display();
+	trace_display();
 	printf("%s: unexpected token %s at line %zu", PARSER_TRACE, token_debug_value(unexpected), parser->lexer.line);
 	exit(1);
 }
 
 static void next_token(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
 	parser->token = parser->next_token;
 	parser->next_token = lexer_next_token(&parser->lexer);
 
@@ -80,7 +79,7 @@ static void next_token(struct Parser *parser)
 
 static struct AstNode *parseInteger(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_INTEGER);
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
@@ -91,7 +90,7 @@ static struct AstNode *parseInteger(struct Parser *parser)
 
 static struct AstNode *parseIdentifier(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_IDENTIFIER);
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
@@ -102,7 +101,7 @@ static struct AstNode *parseIdentifier(struct Parser *parser)
 
 static struct AstNode *parseArrayAccessExpression(struct Parser *parser, struct AstNode *left)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_LBRACKET);
 	struct AstNode *expr = malloc(sizeof(struct AstNode));
 	assert(expr);
@@ -119,7 +118,7 @@ static struct AstNode *parseArrayAccessExpression(struct Parser *parser, struct 
 
 static struct AstNode *parseListExpression(struct Parser *parser, enum TokenType end)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *list_expr = malloc(sizeof(struct AstNode));
 	assert(list_expr);
 
@@ -146,7 +145,7 @@ static struct AstNode *parseListExpression(struct Parser *parser, enum TokenType
 
 static struct AstNode *parseFunctionCallExpression(struct Parser *parser, struct AstNode *left)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *expr = malloc(sizeof(struct AstNode));
 	assert(expr);
 
@@ -161,7 +160,7 @@ static struct AstNode *parseFunctionCallExpression(struct Parser *parser, struct
 
 static struct AstNode *parseInfixExpression(struct Parser *parser, struct AstNode *left)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	enum OpType op;
 	switch (parser->token.type)
 	{
@@ -218,7 +217,7 @@ static struct AstNode *parseInfixExpression(struct Parser *parser, struct AstNod
 
 static struct AstNode *parseGroupedExpression(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_LPAREN);
 	next_token(parser);
 	struct AstNode *expr = parseExpression(parser, 0);
@@ -229,7 +228,7 @@ static struct AstNode *parseGroupedExpression(struct Parser *parser)
 
 static struct AstNode *parsePrefixExpression(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	enum OpType op;
 
 	switch (parser->token.type)
@@ -258,7 +257,7 @@ static struct AstNode *parsePrefixExpression(struct Parser *parser)
 
 static struct AstNode *parseExpression(struct Parser *parser, int precedence)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *left = parsePrefixExpression(parser);
 
 	// && printf("test on %s\n", token_debug_value(parser->next_token.type))
@@ -272,7 +271,7 @@ static struct AstNode *parseExpression(struct Parser *parser, int precedence)
 
 static struct AstNode *parseLetStatement(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_LET_STATEMENT;
@@ -293,7 +292,7 @@ static struct AstNode *parseLetStatement(struct Parser *parser)
 
 static struct AstNode *parseReturnStatement(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_RETURN_STATEMENT;
@@ -306,7 +305,7 @@ static struct AstNode *parseReturnStatement(struct Parser *parser)
 
 static struct AstNode *parseBlockStatement(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 
@@ -322,7 +321,7 @@ static struct AstNode *parseBlockStatement(struct Parser *parser)
 
 static struct AstNode *parseIfStatement(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_IF);
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	node->type = AST_IF_STATEMENT;
@@ -352,7 +351,7 @@ static struct AstNode *parseIfStatement(struct Parser *parser)
 
 static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_FUNCTION);
 	// TODO: each new node allocation should init all fields (NULL init)
 	struct AstNode *node = malloc(sizeof(struct AstNode));
@@ -382,7 +381,7 @@ static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 
 static struct AstNode *parseStatement(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *statement;
 
 	switch (parser->token.type)
@@ -408,7 +407,7 @@ static struct AstNode *parseStatement(struct Parser *parser)
 
 static struct AstNode **parseStatementsUntil(struct Parser *parser, enum TokenType end)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct AstNode *statement;
 	struct AstNode **statements = NULL;
 
@@ -424,16 +423,16 @@ static struct AstNode **parseStatementsUntil(struct Parser *parser, enum TokenTy
 
 struct Program parser_parse(struct Parser *parser)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
+	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct Program program;
 
 	program.statements = parseStatementsUntil(parser, TOKEN_EOF);
+	lexer_zero_string(&parser->lexer);
 	return program;
 }
 
 void parser_init(struct Parser *parser, char *file_content)
 {
-	trace("%s: %s", PARSER_TRACE, __func__);
 	lexer_init(&parser->lexer, file_content);
 	next_token(parser);
 	next_token(parser);

@@ -41,6 +41,11 @@ const char *ast_debug_value(enum NodeType type)
 	return ast_debug[type];
 }
 
+const char *op_debug_value(enum OpType type)
+{
+	return op_debug[type];
+}
+
 void write_space(int i)
 {
 	while (i--)

@@ -23,9 +23,8 @@ print(res);
 ## TODO
 
 - [ ] add while
-- [ ] add context transfer between function caller and callee
-- [ ] nice error message (lexer / parser / evaluator)
-- [ ] debug internal stack trace
-- [ ] create same language but 100% stack based, no malloc and compiled
+- [ ] display of variables name, line and column if runtime_error
 - [ ] use array lookup instead of switchs
+- [ ] don't use hashmap OR own hashmap implementation
+- [ ] 100% stack based, interpreted first then compiled
 - [ ] ~ match python3 speed for fibonacci(35)
