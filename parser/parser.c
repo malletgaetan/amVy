@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "libs/vector.h"
 #include "libs/tracer.h"
@@ -31,20 +32,6 @@ static int	token_precedence[TOKEN_LIMIT] =
 	[TOKEN_LPAREN] = 50,
 	[TOKEN_LBRACKET] = 60,
 };
-
-int	nzatoi(struct String string)
-{
-	int	sign = 1;
-	int	count = 0;
-	unsigned int i = 0;
-
-	while (i < string.size)
-	{
-		count = (count * 10) + (string.str[i] - '0');
-		++i;
-	}
-	return (count * sign);
-}
 
 static struct AstNode *parseExpression(struct Parser *parser, int precedence);
 static struct AstNode **parseStatementsUntil(struct Parser *parser, enum TokenType end);
@@ -84,7 +71,7 @@ static struct AstNode *parseInteger(struct Parser *parser)
 	struct AstNode *node = malloc(sizeof(struct AstNode));
 	assert(node);
 	node->type = AST_INTEGER_LITERAL;
-	node->node.integer_literal.value = nzatoi(parser->token.literal);
+	node->node.integer_literal.value = atoi(parser->token.literal.str);
 	return node;
 }
 
