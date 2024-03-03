@@ -7,6 +7,7 @@
 #include "token/token.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "parser/context.h"
 
 # define PARSER_TRACE "parser"
 
@@ -16,6 +17,8 @@
 //		 in memory for better cache hit rate.
 
 // TODO: add && and || operator
+
+struct Context *ctx;
 
 static int	token_precedence[TOKEN_LIMIT] =
 {
@@ -60,6 +63,15 @@ static struct AstNode *noneAst(void)
 	return none;
 }
 
+static struct AstNode *astBuiltin(enum TokenType type)
+{
+	struct AstNode *builtin = malloc(sizeof(struct AstNode));
+	assert(builtin);
+	builtin->type = AST_BUILTIN;
+	builtin->node.builtin.type = type;
+	return builtin;
+}
+
 static void next_token(struct Parser *parser)
 {
 	parser->token = parser->next_token;
@@ -83,15 +95,25 @@ static struct AstNode *parseInteger(struct Parser *parser)
 	return node;
 }
 
-static struct AstNode *parseIdentifier(struct Parser *parser)
+static struct AstNode *parseIdentifier(struct Parser *parser, int create)
 {
 	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_IDENTIFIER);
-	struct AstNode *node = malloc(sizeof(struct AstNode));
-	assert(node);
-	node->type = AST_IDENTIFIER;
-	node->node.identifier.name = parser->token.literal;
-	return node;
+
+	struct AstNode *node = context_get_addr(ctx, parser->token.literal);
+	if (node != NULL)
+		return node;
+	if (!create) {
+		printf("parser: accessing undefined variable at line %zu\n", parser->lexer.line); // TODO: better error handling
+		trace_display();
+		exit(1);
+	}
+	struct AstNode tmp;
+	tmp.type = AST_IDENTIFIER;
+	tmp.node.identifier.name = parser->token.literal;
+	struct AstNode *a = context_set_addr(ctx, &tmp);
+	assert(a);
+	return a;
 }
 
 static struct AstNode *parseArrayAccessExpression(struct Parser *parser, struct AstNode *left)
@@ -237,8 +259,10 @@ static struct AstNode *parsePrefixExpression(struct Parser *parser)
 		case TOKEN_MINUS:
 			op = UNARY_MINUS;
 			break;
+		case TOKEN_PRINT: // TODO: bad way to handle buitlin.. quick hack for the moment
+			return astBuiltin(TOKEN_PRINT);
 		case TOKEN_IDENTIFIER:
-			return parseIdentifier(parser);
+			return parseIdentifier(parser, 0);
 		case TOKEN_INTEGER:
 			return parseInteger(parser);
 		case TOKEN_LPAREN:
@@ -282,7 +306,7 @@ static struct AstNode *parseLetStatement(struct Parser *parser)
 	node->type = AST_LET_STATEMENT;
 
 	next_token(parser);
-	node->node.let_statement.identifier = parseIdentifier(parser);
+	node->node.let_statement.identifier = parseIdentifier(parser, 1);
 	next_token(parser);
 
 	expected(parser, TOKEN_ASSIGN, parser->token.type);
@@ -378,7 +402,14 @@ static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 
 	next_token(parser);
 	expected(parser, TOKEN_IDENTIFIER, parser->token.type);
-	node->node.function_definition.identifier = parseIdentifier(parser);
+	node->node.function_definition.identifier = parseIdentifier(parser, 1); // create function outside function scope
+
+	struct Context new_context;
+	struct Context *old_context = ctx;
+	context_init(&new_context);
+	ctx = &new_context;
+
+	node->node.function_definition.identifier = parseIdentifier(parser, 1); // create function inside function scope
 	next_token(parser);
 	expected(parser, TOKEN_LPAREN, parser->token.type);
 
@@ -387,12 +418,13 @@ static struct AstNode *parseFunctionDefinition(struct Parser *parser)
 	{
 		if (parser->token.type == TOKEN_COMMA)
 			next_token(parser);
-		struct AstNode *identifier = parseIdentifier(parser);
+		struct AstNode *identifier = parseIdentifier(parser, 1);
 		vector_add(node->node.function_definition.parameters, identifier);
 		next_token(parser);
 	}
 	next_token(parser);
 	node->node.function_definition.block = parseBlockStatement(parser);
+	ctx = old_context; // TODO: here we loose pointer to ctx->hashmap, we don't really care but it still have to be noticed
 	return (node);
 }
 
@@ -471,7 +503,9 @@ struct Program parser_parse(struct Parser *parser)
 {
 	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	struct Program program;
-
+	struct Context context;
+	context_init(&context);
+	ctx = &context;
 	program.statements = parseStatementsUntil(parser, TOKEN_EOF);
 	lexer_zero_string(&parser->lexer);
 	return program;

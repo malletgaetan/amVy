@@ -39,6 +39,7 @@ enum TokenType {
 	TOKEN_ELSE,
 	TOKEN_RETURN,
 	TOKEN_WHILE,
+	TOKEN_PRINT,
 	TOKEN_LIMIT,
 };
 

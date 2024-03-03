@@ -2,6 +2,7 @@
 # define AST_H
 
 # include "libs/string.h"
+# include "token/token.h"
 
 enum OpType {
 	BINARY_ADD,
@@ -40,7 +41,6 @@ struct ArrayAccess {
 struct FunctionCall {
 	struct AstNode *identifier;
 	struct AstNode *arguments;
-	int own_context;
 };
 
 struct FunctionDefinition {
@@ -73,8 +73,13 @@ struct UnaryOp {
 	struct AstNode *value;
 };
 
+struct Builtin {
+	enum TokenType type;
+};
+
 struct Identifier {
 	struct String name;
+	size_t offset;
 };
 
 struct IntegerLiteral {
@@ -96,6 +101,7 @@ enum NodeType {
 	AST_FUNCTION_DEFINITION,
 	AST_WHILE_STATEMENT,
 	AST_NONE,
+	AST_BUILTIN,
 };
 
 struct AstNode {
@@ -114,6 +120,7 @@ struct AstNode {
 		struct BlockStatement block_statement;
 		struct FunctionDefinition function_definition;
 		struct WhileStatement while_statement;
+		struct Builtin builtin;
 	} node;
 };
 

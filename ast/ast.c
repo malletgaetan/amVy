@@ -149,11 +149,12 @@ void print_node(struct AstNode *node, int i)
 			break;
 		case AST_IDENTIFIER:
 			write_space(i * DEBUG_INDENT);
-			printf("[%s]\n", ast_debug[AST_IDENTIFIER]);
+			printf("[%s] stored at %p\n", ast_debug[AST_IDENTIFIER], node);
 			write_space(++i * DEBUG_INDENT);
 			write(STDOUT_FILENO, "name: ", 6);
 			put_string(node->node.identifier.name);
 			write(STDOUT_FILENO, "\n", 1);
+			printf("%*soffset: %zu\n", i * DEBUG_INDENT, " ", node->node.identifier.offset);
 			break;
 		case AST_INTEGER_LITERAL:
 			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_INTEGER_LITERAL]);

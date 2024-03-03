@@ -56,6 +56,8 @@ static struct Token new_identifier(struct Lexer *lexer)
 		token.type = TOKEN_LET;
 	else if (token.literal.size == 4 && strncmp(token.literal.str, "else", 4) == 0)
 		token.type = TOKEN_ELSE;
+	else if (token.literal.size == 5 && strncmp(token.literal.str, "print", 5) == 0)
+		token.type = TOKEN_PRINT;
 	else if (token.literal.size == 5 && strncmp(token.literal.str, "while", 5) == 0)
 		token.type = TOKEN_WHILE;
 	else if (token.literal.size == 6 && strncmp(token.literal.str, "return", 6) == 0)

@@ -32,11 +32,6 @@ struct BlockEvalValue {
 	struct EvalValue val;
 };
 
-struct EvalValueMap {
-	struct String identifier;
-	struct EvalValue val;
-};
-
 void evaluator_eval(struct Program program);
 
 #endif
