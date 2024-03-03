@@ -51,4 +51,3 @@ will create an executable that, in case of crash, will print the stack trace of 
 - support for arrays
 - make tracer stack depth aware, like --ast opt
 - don't use hashmap OR own hashmap implementation
-- ~ match python3 speed for fibonacci(35)

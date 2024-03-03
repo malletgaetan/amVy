@@ -1,6 +1,6 @@
 NAME = amVy
 CC = clang
-CFLAGS = -Wall -Werror -Wextra -std=gnu99 -I .
+CFLAGS = -Wall -Werror -Wextra -std=gnu99 -I . -O3
 RM = rm -f
 
 _SRCS=$(shell find . -name '*.c' ! -name "*.test.c" ! -name "main.c")
