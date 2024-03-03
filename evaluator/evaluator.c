@@ -311,6 +311,8 @@ static struct EvalValue evalExpression(struct AstNode *node,  struct hashmap *co
 	trace("%s: %s(%s)", EVAL_TRACER, __func__, ast_debug_value(node->type));
 	switch (node->type)
 	{
+		case AST_NONE:
+			return (struct EvalValue){.type=VALUE_NONE};
 		case AST_IDENTIFIER:
 			return evalIdentifier(node, context);
 		case AST_BINARY_OP:

@@ -18,7 +18,7 @@ print(res);
 
 ## TODO
 
-- [ ] make "return ;" and "return ()" valid
+- [ ] support for arrays
 - [ ] use array lookup instead of switchs
 - [ ] don't use hashmap OR own hashmap implementation
 - [ ] 100% stack based, interpreted first then compiled

@@ -52,6 +52,14 @@ static void unexpected_error(struct Parser *parser, enum TokenType unexpected)
 	exit(1);
 }
 
+static struct AstNode *noneAst(void)
+{
+	struct AstNode *none = malloc(sizeof(struct AstNode));
+	assert(none);
+	none->type = AST_NONE;
+	return none;
+}
+
 static void next_token(struct Parser *parser)
 {
 	parser->token = parser->next_token;
@@ -206,9 +214,15 @@ static struct AstNode *parseGroupedExpression(struct Parser *parser)
 {
 	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
 	assert(parser->token.type == TOKEN_LPAREN);
+	struct AstNode *expr;
 	next_token(parser);
-	struct AstNode *expr = parseExpression(parser, 0);
-	next_token(parser);
+	// TODO: there's a pattern about this if else, make it innerParseExpression and outerParseExpression, outerParseExpression having a TOKEN_END token
+	if (parser->token.type != TOKEN_RPAREN) {
+		expr = parseExpression(parser, 0);
+		next_token(parser);
+	} else {
+		expr = noneAst();
+	}
 	expected(parser, TOKEN_RPAREN, parser->token.type);
 	return expr;
 }
@@ -229,6 +243,8 @@ static struct AstNode *parsePrefixExpression(struct Parser *parser)
 			return parseInteger(parser);
 		case TOKEN_LPAREN:
 			return parseGroupedExpression(parser);
+		case TOKEN_RPAREN:
+			return noneAst();
 		default:
 			unexpected_error(parser, parser->token.type);
 	}
@@ -245,6 +261,8 @@ static struct AstNode *parsePrefixExpression(struct Parser *parser)
 static struct AstNode *parseExpression(struct Parser *parser, int precedence)
 {
 	trace("%s: %s(%s)", PARSER_TRACE, __func__, token_debug_value(parser->token.type));
+	if (parser->token.type == TOKEN_SEMICOLON)
+		unexpected_error(parser, TOKEN_SEMICOLON);
 	struct AstNode *left = parsePrefixExpression(parser);
 
 	// && printf("test on %s\n", token_debug_value(parser->next_token.type))
@@ -270,8 +288,12 @@ static struct AstNode *parseLetStatement(struct Parser *parser)
 	expected(parser, TOKEN_ASSIGN, parser->token.type);
 
 	next_token(parser);
-	node->node.let_statement.value = parseExpression(parser, 0);
-	next_token(parser);
+	if (parser->token.type != TOKEN_SEMICOLON) {
+		node->node.let_statement.value = parseExpression(parser, 0);
+		next_token(parser);
+	} else {
+		node->node.let_statement.value = noneAst();
+	}
 	expected(parser, TOKEN_SEMICOLON, parser->token.type);
 	return node;
 }
@@ -283,8 +305,14 @@ static struct AstNode *parseReturnStatement(struct Parser *parser)
 	assert(node);
 	node->type = AST_RETURN_STATEMENT;
 	next_token(parser);
-	node->node.return_statement.expr = parseExpression(parser, 0);
-	next_token(parser);
+
+	if (parser->token.type != TOKEN_SEMICOLON) {
+		node->node.return_statement.expr = parseExpression(parser, 0);
+		next_token(parser);
+	} else {
+		node->node.return_statement.expr = noneAst();
+	}
+
 	expected(parser, TOKEN_SEMICOLON, parser->token.type);
 	return node;
 }
@@ -315,8 +343,12 @@ static struct AstNode *parseIfStatement(struct Parser *parser)
 
 	expected(parser, TOKEN_LPAREN, parser->token.type);
 	next_token(parser);
-	node->node.if_statement.cond = parseExpression(parser, 0);
-	next_token(parser);
+	if (parser->token.type != TOKEN_RPAREN) {
+		node->node.if_statement.cond = parseExpression(parser, 0);
+		next_token(parser);
+	} else {
+		node->node.if_statement.cond = noneAst();
+	}
 	expected(parser, TOKEN_RPAREN, parser->token.type);
 	next_token(parser);
 
@@ -374,8 +406,12 @@ static struct AstNode *parseWhileStatement(struct Parser *parser)
 
 	expected(parser, TOKEN_LPAREN, parser->token.type);
 	next_token(parser);
-	node->node.while_statement.cond = parseExpression(parser, 0);
-	next_token(parser);
+	if (parser->token.type != TOKEN_RPAREN) {
+		node->node.while_statement.cond = parseExpression(parser, 0);
+		next_token(parser);
+	} else {
+		node->node.while_statement.cond = noneAst();
+	}
 	expected(parser, TOKEN_RPAREN, parser->token.type);
 	next_token(parser);
 
@@ -404,6 +440,8 @@ static struct AstNode *parseStatement(struct Parser *parser)
 			return parseWhileStatement(parser);
 		case TOKEN_FUNCTION:
 			return parseFunctionDefinition(parser);
+		case TOKEN_SEMICOLON:
+			return NULL;
 		default:
 			statement = parseExpression(parser, 0);
 			next_token(parser);

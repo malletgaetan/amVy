@@ -35,6 +35,7 @@ char *ast_debug[] =
 	[AST_BLOCK_STATEMENT] = "AST_BLOCK_STATEMENT",
 	[AST_FUNCTION_DEFINITION] = "AST_FUNCTION_DEFINITION",
 	[AST_WHILE_STATEMENT] = "AST_WHILE_STATEMENT",
+	[AST_NONE] = "AST_NONE",
 };
 
 const char *ast_debug_value(enum NodeType type)
@@ -59,6 +60,9 @@ void print_node(struct AstNode *node, int i)
 {
 	switch (node->type)
 	{
+		case AST_NONE:
+			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_NONE]);
+			break;
 		case AST_FUNCTION_DEFINITION:
 			printf("%*s[%s]\n", i * DEBUG_INDENT, " ", ast_debug[AST_FUNCTION_DEFINITION]);
 			printf("%*sidentifier:\n", ++i * DEBUG_INDENT, " ");
