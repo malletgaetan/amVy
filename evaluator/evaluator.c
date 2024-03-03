@@ -58,6 +58,29 @@ static void expectIdentifier(struct AstNode *node)
 	exit(1);
 }
 
+static int add(int left, int right) { return left + right; }
+static int minus(int left, int right) { return left - right; }
+static int multiply(int left, int right) { return left * right; }
+static int divide(int left, int right) { return left / right; }
+static int modulo(int left, int right) { return left % right; }
+static int equal(int left, int right) { return left == right; }
+static int not_equal(int left, int right) { return left != right; }
+static int less_than(int left, int right) { return left < right; }
+static int greater_than(int left, int right) { return left > right; }
+
+int(*eval_binary_op[OP_LIMIT])(int, int) = 
+{
+	[BINARY_ADD] = &add,
+	[BINARY_MINUS] = &minus,
+	[BINARY_MULTIPLY] = &multiply,
+	[BINARY_DIVIDE] = &divide,
+	[BINARY_MODULO] = &modulo,
+	[BINARY_EQUAL] = &equal,
+	[BINARY_NOT_EQUAL] = &not_equal,
+	[BINARY_LT] = &less_than,
+	[BINARY_GT] = &greater_than,
+};
+
 static struct EvalValue evalBinaryOp(struct AstNode *node, size_t offset)
 {
 	trace("%s: %s(%s, %zu)", EVAL_TRACER, __func__, ast_debug_value(node->type), offset);
@@ -75,40 +98,13 @@ static struct EvalValue evalBinaryOp(struct AstNode *node, size_t offset)
 	struct EvalValue right = evalExpression(node->node.binary_op.right, offset);
 
 	binaryOpTypeCheck(left, right);
-
-	switch (node->node.binary_op.op)
+	int(*f)(int, int) = eval_binary_op[node->node.binary_op.op];
+	if (f == NULL)
 	{
-		case BINARY_ADD:
-			left.value.integer += right.value.integer;
-			break;
-		case BINARY_MINUS:
-			left.value.integer -= right.value.integer;
-			break;
-		case BINARY_MULTIPLY:
-			left.value.integer *= right.value.integer;
-			break;
-		case BINARY_DIVIDE:
-			left.value.integer /= right.value.integer;
-			break;
-		case BINARY_MODULO:
-			left.value.integer %= right.value.integer;
-			break;
-		case BINARY_EQUAL:
-			left.value.integer = left.value.integer == right.value.integer;
-			break;
-		case BINARY_NOT_EQUAL:
-			left.value.integer = left.value.integer != right.value.integer;
-			break;
-		case BINARY_LT:
-			left.value.integer = left.value.integer < right.value.integer;
-			break;
-		case BINARY_GT:
-			left.value.integer = left.value.integer > right.value.integer;
-			break;
-		default:
-			trace_display();
-			assert(NULL);
+		trace_display();
+		assert(NULL);
 	}
+	left.value.integer = f(left.value.integer, right.value.integer);
 	return left;
 }
 
@@ -134,10 +130,11 @@ static struct EvalValue evalUnaryOp(struct AstNode *node, size_t offset)
 	return val;
 }
 
-static struct EvalValue evalIntegerLiteral(struct AstNode *node)
+static struct EvalValue evalIntegerLiteral(struct AstNode *node, size_t offset)
 {
 	trace("%s: %s(%s)", EVAL_TRACER, __func__, ast_debug_value(node->type));
 	assert(node);
+	(void)offset;
 
 	struct EvalValue val;
 
@@ -294,32 +291,33 @@ static struct EvalValue evalFunctionCall(struct AstNode *node, size_t offset)
 	return ret.val;
 }
 
+static struct EvalValue evalNone(struct AstNode *node, size_t offset)
+{
+	(void)node;
+	(void)offset;
+	return (struct EvalValue){.type=VALUE_NONE};
+}
+
+struct EvalValue(*eval_expression[AST_LIMIT])(struct AstNode *, size_t) = 
+{
+	[AST_NONE] = &evalNone,
+	[AST_IDENTIFIER] = &evalIdentifier,
+	[AST_INTEGER_LITERAL] = &evalIntegerLiteral,
+	[AST_BINARY_OP] = &evalBinaryOp,
+	[AST_UNARY_OP] = &evalUnaryOp,
+	[AST_FUNCTION_CALL] = &evalFunctionCall,
+};
+
 // never returns NULL, should crash before
 static struct EvalValue evalExpression(struct AstNode *node,  size_t offset)
 {
 	trace("%s: %s(%s, %zu)", EVAL_TRACER, __func__, ast_debug_value(node->type), offset);
-	switch (node->type)
-	{
-		case AST_NONE:
-			return (struct EvalValue){.type=VALUE_NONE};
-		case AST_IDENTIFIER:
-			return evalIdentifier(node, offset);
-		case AST_BINARY_OP:
-			return evalBinaryOp(node, offset);
-		case AST_UNARY_OP:
-			return evalUnaryOp(node, offset);
-		case AST_INTEGER_LITERAL:
-			return evalIntegerLiteral(node);
-		case AST_ARRAY_ACCESS:
-			assert(NULL); // TODO: support for arrays
-		case AST_FUNCTION_CALL:
-			return evalFunctionCall(node, offset);
-		case AST_LIST_EXPRESSION:
-			assert(NULL); // TODO
-		default:
-			trace_display();
-			assert(NULL);
+	struct EvalValue(*f)(struct AstNode *, size_t) = eval_expression[node->type];
+	if (f == NULL) {
+		trace_display();
+		assert(NULL);
 	}
+	return f(node, offset);
 }
 
 static struct EvalValue evalLetStatement(struct AstNode *node, size_t offset)
@@ -377,13 +375,12 @@ void evaluator_eval(struct Program program)
 {
 	trace("%s: %s", EVAL_TRACER, __func__);
 	stack_init(&stack);
-	struct EvalValue val;
 	for (size_t i = 0; i < vector_size(program.statements); i++)
 	{
 		switch(program.statements[i]->type)
 		{
 			case AST_LET_STATEMENT:
-				val = evalLetStatement(program.statements[i], 0);
+				evalLetStatement(program.statements[i], 0);
 				continue ;
 			case AST_WHILE_STATEMENT:
 				evalWhileStatement(program.statements[i], 0);

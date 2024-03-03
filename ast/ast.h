@@ -16,6 +16,7 @@ enum OpType {
 	BINARY_LT,
 	BINARY_GT,
 	BINARY_ASSIGN,
+	OP_LIMIT,
 };
 
 struct LetStatement {
@@ -102,6 +103,7 @@ enum NodeType {
 	AST_WHILE_STATEMENT,
 	AST_NONE,
 	AST_BUILTIN,
+	AST_LIMIT,
 };
 
 struct AstNode {
