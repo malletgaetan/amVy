@@ -78,8 +78,9 @@ static void skip_whitespaces(struct Lexer *lexer)
 {
 	while (lexer->input[lexer->index] && is_space(lexer->input[lexer->next_index]))
 	{
-		if (lexer->input[lexer->next_index] == '\n')
-			++lexer->line;
+		if (lexer->input[lexer->next_index] == '\n') {
+			++lexer->next_line;
+		}
 		++lexer->next_index;
 	}
 }
@@ -89,7 +90,7 @@ void lexer_init(struct Lexer *lexer, char *file_content)
 	lexer->input = file_content;
 	lexer->index = 0;
 	lexer->next_index = 0;
-	lexer->line = 1;
+	lexer->next_line = 1;
 }
 
 void lexer_destroy(struct Lexer *lexer)
@@ -117,6 +118,7 @@ void lexer_zero_string(struct Lexer *lexer)
 struct Token lexer_next_token(struct Lexer *lexer)
 {
 	skip_whitespaces(lexer);
+	lexer->line = lexer->next_line;
 	lexer->index = lexer->next_index;
 	if (!lexer->input[lexer->index])
 			return new_token(lexer, TOKEN_EOF);

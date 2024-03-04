@@ -1,7 +1,7 @@
-# A small and simple interpreter for amVy
+# amVy interpreter
 
-amVy is a simple language, derived from the Monkey programming language, which was my first source of knowledge for writting this interpreter.
-The final objective is to build a 100% stack based, no heap data structure programming language.
+amVy is a simple language, derived from the Monkey programming language, which was my first source of knowledge while designing amVy.
+The final objective is to build a language with no heap, that still implement a sort of dynamic memory allocation.
 
 ## Example
 
@@ -24,21 +24,20 @@ First build the interpreter
 make
 ```
 
-Then execute amVy code
+Execute code
 ```
 ./amVy mycode.vY
 ```
 
-Instead of intepreter directly the code, you can only print the outputed AST
+Print the generated AST
 ```
 ./amVy mycode.vY --ast
 ```
 
-For debugging purpose
+Compile amVy with an internal stack trace for debugging purposes
 ```
 make debug
 ```
-will create an executable that, in case of crash, will print the stack trace of the parser and evaluator.
 
 ## Main resources
 
@@ -49,5 +48,6 @@ will create an executable that, in case of crash, will print the stack trace of 
 ## TODO
 
 - support for arrays
-- make tracer stack depth aware, like --ast opt
-- don't use hashmap OR own hashmap implementation
+- add callstack limit
+- make the tracer stack depth aware, like --ast opt
+- own hashmap implementation

@@ -29,7 +29,7 @@ lexer_tests: $(_OBJS)
 	./lexer_tests
 	$(RM) lexer_tests
 
-tests: lexer_tests
+tests: lexer_tests $(NAME)
 	./e2e.sh
 
 clean:

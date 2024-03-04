@@ -82,7 +82,6 @@ int main(int ac, char **av)
 	evaluator_eval(program);
 	quit:
 	parser_destroy(&parser);
-	trace_clear();
 	return (0);
 }
 

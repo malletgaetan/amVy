@@ -6,6 +6,7 @@
 struct Lexer {
 	char *input;
 	size_t line;
+	size_t next_line;
 	size_t index;
 	size_t next_index;
 };
