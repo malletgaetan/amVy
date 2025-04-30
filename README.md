@@ -41,7 +41,7 @@ make debug
 
 ## Main resources
 
-- https://www.amazon.fr/Writing-Interpreter-Go-Thorsten-Ball/dp/300055808X
+- https://interpreterbook.com
 - https://chidiwilliams.com/posts/on-recursive-descent-and-pratt-parsing
 - https://www.gingerbill.org/series/memory-allocation-strategies/
 
